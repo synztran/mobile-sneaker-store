@@ -236,7 +236,7 @@ export function FilterOverlay({
 							setPriceMax(500);
 						}}
 						className="font-bold text-on-surface text-sm">
-						Reset All
+						Đặt lại
 					</button>
 					<button
 						onClick={() => {
@@ -250,7 +250,7 @@ export function FilterOverlay({
 							onClose();
 						}}
 						className="btn primary-gradient text-white border-0 rounded-2xl normal-case font-bold px-8 py-3 h-auto">
-						Apply Filters
+						Áp dụng
 					</button>
 				</div>
 			</div>

@@ -25,15 +25,15 @@ export default function RegisterPage() {
 	const handleRegister = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!form.fullName || !form.email || !form.password) {
-			toast.error("Please fill in all fields");
+			toast.error("Vui lòng điền đầy đủ thông tin");
 			return;
 		}
 		if (form.password !== form.confirmPassword) {
-			toast.error("Passwords do not match");
+			toast.error("Mật khẩu không khớp");
 			return;
 		}
 		if (!agreed) {
-			toast.warning("Please agree to the Terms & Conditions");
+			toast.warning("Vui lòng đồng ý với Điều khoản & Điều kiện");
 			return;
 		}
 		setLoading(true);
@@ -47,7 +47,7 @@ export default function RegisterPage() {
 			toast.error(error);
 			return;
 		}
-		toast.success("Account created! Check your email to confirm.");
+		toast.success("Tài khoản đã được tạo! Kiểm tra email để xác nhận.");
 		router.push("/");
 	};
 
@@ -60,10 +60,10 @@ export default function RegisterPage() {
 		<div className="flex-1 flex flex-col px-8 pt-16 pb-12">
 			{/* Heading */}
 			<h2 className="text-4xl font-black text-on-surface mb-2 tracking-tight">
-				Create Account
+				Tạo tài khoản
 			</h2>
 			<p className="text-on-surface-variant text-sm mb-8">
-				Join Sneaker Lab for exclusive access.
+				Tham gia Sneaker Lab để có quyền truy cập độc quyền.
 			</p>
 
 			{/* Form */}
@@ -76,7 +76,7 @@ export default function RegisterPage() {
 					<input
 						type="text"
 						name="fullName"
-						placeholder="Full Name"
+						placeholder="Họ và tên"
 						value={form.fullName}
 						onChange={handleChange}
 						className="flex-1 bg-transparent text-on-surface placeholder:text-outline font-medium outline-none"
@@ -124,7 +124,7 @@ export default function RegisterPage() {
 					<input
 						type="password"
 						name="confirmPassword"
-						placeholder="Confirm Password"
+						placeholder="Xác nhận mật khẩu"
 						value={form.confirmPassword}
 						onChange={handleChange}
 						className="flex-1 bg-transparent text-on-surface placeholder:text-outline font-medium outline-none"
@@ -141,13 +141,13 @@ export default function RegisterPage() {
 						className="checkbox checkbox-sm mt-0.5 rounded border-outline-variant checked:bg-primary checked:border-primary"
 					/>
 					<span className="text-sm text-on-surface leading-relaxed">
-						I agree to the{" "}
-						<Link href="#" className="underline underline-offset-2">
-							Terms &amp; Conditions
-						</Link>{" "}
-						and{" "}
-						<Link href="#" className="underline underline-offset-2">
-							Privacy Policy
+					Tôi đồng ý với{" "}
+					<Link href="#" className="underline underline-offset-2">
+						Điều khoản &amp; Điều kiện
+					</Link>{" "}
+					và{" "}
+					<Link href="#" className="underline underline-offset-2">
+						Chính sách bảo mật
 						</Link>
 					</span>
 				</label>
@@ -160,7 +160,7 @@ export default function RegisterPage() {
 					{loading ? (
 						<span className="loading loading-spinner loading-sm" />
 					) : (
-						"Register"
+						"Đăng ký"
 					)}
 				</button>
 			</form>
@@ -169,7 +169,7 @@ export default function RegisterPage() {
 			<div className="flex items-center gap-4 my-6">
 				<div className="flex-1 h-px bg-outline-variant" />
 				<span className="text-sm text-on-surface-variant font-medium">
-					Or sign up with
+					Hoặc đăng ký với
 				</span>
 				<div className="flex-1 h-px bg-outline-variant" />
 			</div>
@@ -223,9 +223,9 @@ export default function RegisterPage() {
 
 			{/* Log in link */}
 			<p className="text-center mt-8 text-on-surface text-sm">
-				Already have an account?{" "}
+				Đã có tài khoản?{" "}
 				<Link href="/login" className="font-black text-primary">
-					Log In
+					Đăng nhập
 				</Link>
 			</p>
 		</div>

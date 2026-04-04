@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 export interface ProductVariantDetail {
 	id: number;
 	color_id: number | null;
+	size_id: number | null;
 	size: number;
 	color: string;
 	color_hex: string;
@@ -80,6 +81,7 @@ type RawProductRow = {
 		size: string;
 		color: string;
 		color_id: number | null;
+		size_id: number | null;
 		price: number;
 		stock_quantity: number;
 		sku: string | null;
@@ -112,7 +114,8 @@ export async function GET(
 				 condition, release_date, brand_id,
 				 brands(id, name),
 				 product_images(image_url, alt_text, is_primary, sort_order),
-				 product_variants(id, size, color, color_id, price, stock_quantity, sku, colors(name, color_value))`,
+				 product_variants(id, size, color, color_id, size_id, price, stock_quantity, sku, colors(name, color_value))`,
+
 			)
 			.eq("slug", slug)
 			.limit(1)
@@ -150,13 +153,14 @@ export async function GET(
 		).map((v) => ({
 			id: v.id,
 			color_id: v.color_id,
-			size: parseFloat(v.size),
+			size_id: v.size_id,
+			size: parseFloat(String(v.size).replace(/[^0-9.]/g, "")),
 			color: v.color,
 			color_hex: v.colors?.color_value ?? COLOR_HEX[v.color] ?? "#9ca3af",
 			price: v.price,
 			stock_quantity: v.stock_quantity,
 			sku: v.sku,
-		}));
+		})).filter((v) => !isNaN(v.size));
 
 		// ── Derived helpers ───────────────────────────────────────────────
 		const uniqueColors = [
@@ -168,6 +172,7 @@ export async function GET(
 			).values(),
 		];
 
+		// Build size list sorted numerically
 		const uniqueSizes = [
 			...new Map(
 				variants.map((v) => [

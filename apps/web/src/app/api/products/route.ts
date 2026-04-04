@@ -60,6 +60,7 @@ type VariantRow = {
 	size: string;
 	color: string;
 	color_id: number | null;
+	size_id: number | null;
 	price: number;
 	stock_quantity: number;
 	colors: { name: string; color_value: string } | null;
@@ -141,7 +142,7 @@ export async function GET(req: NextRequest) {
 			`id, slug, model_name, description, retail_price, resale_price, condition, created_at,
 			 brands(id, name),
 			 product_images(image_url, is_primary, sort_order),
-			 product_variants(size, color, color_id, price, stock_quantity, colors(name, color_value))`,
+			 product_variants(size, color, color_id, size_id, price, stock_quantity, colors(name, color_value))`,
 		);
 
 		if (search) query = query.ilike("model_name", `%${search}%`);
@@ -173,7 +174,11 @@ export async function GET(req: NextRequest) {
 
 			const uniqueColors = [...new Set(variants.map((v) => v.color))];
 			const uniqueSizes = [
-				...new Set(variants.map((v) => parseFloat(v.size))),
+				...new Set(
+					variants
+						.map((v) => parseFloat(String(v.size).replace(/[^0-9.]/g, "")))
+						.filter((n) => !isNaN(n)),
+				),
 			].sort((a, b) => a - b);
 
 			const minPrice =
@@ -215,7 +220,7 @@ export async function GET(req: NextRequest) {
 					size,
 					available: variants.some(
 						(v) =>
-							parseFloat(v.size) === size && v.stock_quantity > 0,
+							parseFloat(String(v.size).replace(/[^0-9.]/g, "")) === size && v.stock_quantity > 0,
 					),
 				})),
 				badge,

@@ -103,6 +103,7 @@ export interface Database {
 					size: string;
 					color: string;
 					color_id: number | null;
+          size_id: number | null;           // ← NEW
 					sku: string | null;
 					stock_quantity: number;
 					price: number;
@@ -114,6 +115,7 @@ export interface Database {
 					size: string;
 					color: string;
 					color_id?: number | null;
+          size_id?: number | null;          // ← NEW
 					sku?: string | null;
 					stock_quantity?: number;
 					price: number;
@@ -125,6 +127,7 @@ export interface Database {
 					size?: string;
 					color?: string;
 					color_id?: number | null;
+          size_id?: number | null;          // ← NEW
 					sku?: string | null;
 					stock_quantity?: number;
 					price?: number;
@@ -302,6 +305,30 @@ export interface Database {
 					created_at?: never;
 				};
 			};
+
+      sizes: {
+        Row: {
+          id: number;
+          name: string;
+          slug: string;
+          sort_order: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: never;
+          name: string;
+          slug: string;
+          sort_order?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: never;
+          name?: string;
+          slug?: string;
+          sort_order?: number | null;
+          created_at?: never;
+        };
+      };
 		};
 		Views: Record<string, never>;
 		Functions: Record<string, never>;

@@ -17,7 +17,7 @@ export default function LoginPage() {
 	const handleSignIn = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!email || !password) {
-			toast.error("Please fill in all fields");
+			toast.error("Vui lòng điền đầy đủ thông tin");
 			return;
 		}
 		setLoading(true);
@@ -27,7 +27,7 @@ export default function LoginPage() {
 			toast.error(error);
 			return;
 		}
-		toast.success("Welcome back!");
+		toast.success("Chào mừng trở lại!");
 		router.push("/");
 	};
 
@@ -52,7 +52,7 @@ export default function LoginPage() {
 
 			{/* Heading */}
 			<h2 className="text-4xl font-black text-on-surface mb-8 tracking-tight text-center">
-				Welcome Back
+				Chào mừng trở lại
 			</h2>
 
 			{/* Form */}
@@ -64,7 +64,7 @@ export default function LoginPage() {
 					</span>
 					<input
 						type="email"
-						placeholder="Email Address"
+						placeholder="Địa chỉ Email"
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
 						className="flex-1 bg-transparent text-on-surface placeholder:text-outline font-medium outline-none"
@@ -79,7 +79,7 @@ export default function LoginPage() {
 					</span>
 					<input
 						type={showPassword ? "text" : "password"}
-						placeholder="Password"
+					placeholder="Mật khẩu"
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
 						className="flex-1 bg-transparent text-on-surface placeholder:text-outline font-medium outline-none"
@@ -100,7 +100,7 @@ export default function LoginPage() {
 					<Link
 						href="/forgot-password"
 						className="text-sm font-semibold text-on-surface underline underline-offset-4">
-						Forgot Password?
+						Quên mật khẩu?
 					</Link>
 				</div>
 
@@ -112,16 +112,16 @@ export default function LoginPage() {
 					{loading ? (
 						<span className="loading loading-spinner loading-sm" />
 					) : (
-						"Sign In"
-					)}
-				</button>
-			</form>
+					"Đăng nhập"
+				)}
+			</button>
+		</form>
 
 			{/* Divider */}
 			<div className="flex items-center gap-4 my-6">
 				<div className="flex-1 h-px bg-outline-variant" />
 				<span className="text-sm text-on-surface-variant font-medium">
-					Or continue with
+					Hoặc tiếp tục với
 				</span>
 				<div className="flex-1 h-px bg-outline-variant" />
 			</div>
@@ -171,7 +171,7 @@ export default function LoginPage() {
 				<Link
 					href="/register"
 					className="font-black text-on-surface underline underline-offset-4">
-					Sign Up
+					Đăng ký
 				</Link>
 			</p>
 		</div>

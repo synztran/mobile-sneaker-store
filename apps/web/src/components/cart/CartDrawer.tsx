@@ -4,24 +4,41 @@ import { formatVND } from "@/lib/currency";
 import { useCartStore } from "@/store";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect } from "react";
 
 export function CartDrawer() {
 	const { items, isOpen, closeCart, updateQty, removeItem, total } =
 		useCartStore();
 	const subtotal = total();
 
-	if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    }
+  }, [isOpen])
+
 
 	return (
 		<>
-			{/* Backdrop */}
 			<div
-				className="fixed inset-0 bg-on-surface/30 backdrop-blur-sm z-[60]"
+				className={`fixed inset-0 bg-on-surface/30 backdrop-blur-sm z-[60] transition-opacity duration-300 ${
+					isOpen
+						? "opacity-100 pointer-events-auto"
+						: "opacity-0 pointer-events-none"
+				}`}
 				onClick={closeCart}
 			/>
 
 			{/* Drawer */}
-			<div className="fixed bottom-0 left-0 right-0 z-[70] bg-surface rounded-t-5xl shadow-ambient-lg max-h-[90vh] flex flex-col animate-in slide-in-from-bottom duration-300">
+			<div
+				className={`fixed left-0 right-0 z-[999] bg-surface rounded-t-5xl shadow-ambient-lg max-h-[80vh] h-full flex flex-col transition-all duration-250 ease-out ${
+					isOpen ? "top-[20vh]" : "top-[100vh]"
+				}`}
+			>
 				{/* Handle */}
 				<div className="flex justify-center pt-3 pb-2">
 					<div className="w-10 h-1 bg-outline-variant rounded-full" />
@@ -47,7 +64,7 @@ export function CartDrawer() {
 								shopping_bag
 							</span>
 							<p className="mt-3 text-on-surface-variant font-semibold">
-								Your bag is empty
+								Giỏ hàng trống
 							</p>
 						</div>
 					) : (
@@ -60,7 +77,7 @@ export function CartDrawer() {
 										src={item.product.images[0]}
 										alt={item.product.name}
 										fill
-										className="object-contain p-2"
+										className="object-contain p-2 mix-blend-darken"
 										unoptimized
 									/>
 								</div>
@@ -69,7 +86,7 @@ export function CartDrawer() {
 										{item.product.name}
 									</p>
 									<p className="text-xs text-on-surface-variant font-semibold uppercase tracking-wide mt-0.5">
-										SIZE: {item.size}
+										CỠ: {item.size}
 									</p>
 									<div className="flex items-center justify-between mt-2">
 										<div className="flex items-center gap-3 bg-surface-container rounded-full px-3 py-1.5">
@@ -121,7 +138,7 @@ export function CartDrawer() {
 								eco
 							</span>
 							<p className="text-secondary text-xs font-bold uppercase tracking-wider">
-								Sustainable packaging selected for this order.
+								Đơn hàng này được đóng gói thân thiện với môi trường.
 							</p>
 						</div>
 					)}
@@ -133,7 +150,7 @@ export function CartDrawer() {
 						<div className="space-y-2 mb-4">
 							<div className="flex justify-between">
 								<span className="text-on-surface-variant text-sm">
-									Subtotal
+										Tạm tính
 								</span>
 								<span className="font-semibold text-on-surface">
 									{formatVND(subtotal)}
@@ -141,15 +158,15 @@ export function CartDrawer() {
 							</div>
 							<div className="flex justify-between">
 								<span className="text-on-surface-variant text-sm">
-									Estimated Shipping
+										Phí vận chuyển dự kiến
 								</span>
 								<span className="font-semibold text-secondary">
-									Free
+									Miễn phí
 								</span>
 							</div>
 							<div className="flex justify-between pt-2">
 								<span className="font-bold text-on-surface">
-									Total
+									Tổng cộng
 								</span>
 								<span className="text-primary font-black text-xl">
 									{formatVND(subtotal)}
@@ -161,10 +178,10 @@ export function CartDrawer() {
 							href="/checkout/shipping"
 							onClick={closeCart}
 							className="btn w-full primary-gradient text-white border-0 rounded-full normal-case font-bold tracking-widest uppercase py-4 h-auto text-base shadow-ambient-sm active:scale-[0.98] transition-transform">
-							CHECKOUT →
+							THANH TOÁN →
 						</Link>
 						<p className="text-center text-xs text-on-surface-variant mt-3 font-semibold uppercase tracking-widest">
-							Secure Encrypted Payment
+							Thanh toán bảo mật & mã hóa
 						</p>
 					</div>
 				)}

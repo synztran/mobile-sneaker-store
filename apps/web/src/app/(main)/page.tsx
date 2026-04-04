@@ -4,27 +4,27 @@ import Image from "next/image";
 import Link from "next/link";
 
 const CATEGORIES = [
-	{ icon: "directions_run", label: "Running", active: false },
+	{ icon: "directions_run", label: "Chạy bộ", active: false },
 	{ icon: "styler", label: "Lifestyle", active: true },
-	{ icon: "sports_basketball", label: "Basketball", active: false },
-	{ icon: "fitness_center", label: "Training", active: false },
-	{ icon: "hiking", label: "Outdoor", active: false },
+	{ icon: "sports_basketball", label: "Bóng rổ", active: false },
+	{ icon: "fitness_center", label: "Tập luyện", active: false },
+	{ icon: "hiking", label: "Ngoài trời", active: false },
 ];
 
 const EDITOR_PICKS = [
 	{
 		image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAoDnQ1ZNBd6nR7hQTeEZejpmgvfOJd-fM09mfsNKgBttUG_f9x0VhLxbv1abQ_URBdhfUEimvqny_6PijNE_kj99kz1zUeWdMATKbO75HcWAMxU1NZD-C7eSlGV25HwM4PUqzVm9r6uqoSq19Oyv3_1EtLCkrfb1rwZuh2GVM_6a_FYyCMs-oK5kKaQ89KTQ9zVGMrjcSoIwTktws5DjlByZWL96AT5XDUaUigJlB9FYbWv9czkLkO6MKIS-JgV-ptSo5X3qfyKS4",
-		label: "Heritage Series",
-		title: "THE ARCHIVE REVIVAL",
-		desc: "A curated selection of silhouettes that defined a generation, reconstructed with modern materials for the streets of today.",
-		cta: "Discover Story",
+		label: "Dòng Di Sản",
+		title: "PHỤC SINH HUYỀN THOẠI",
+		desc: "Tuyển chọn những mẫu giày đã định hình cả một thế hệ, được phục dựng bằng chất liệu hiện đại cho nhịp sống ngày nay.",
+		cta: "Khám phá câu chuyện",
 	},
 	{
 		image: "https://lh3.googleusercontent.com/aida-public/AB6AXuADrUhneZqMRDzXgw4YvT3HrCEH5PlmpZ4mNAxxboeGGOAu2r5GUlGbsrI91odysx5_nYbgRU95AOZn5bjTd6LYaIfuK2Jrq_KCNUnsSI9N9pLy_vYj7xsL47X5RrrgvNt8bvHVZGfF334SWweu88na6oMwWhb38ZiUwVKureZUXuKamcvGBdHS-VXWhmz3fbd_vaxtSrwqFjHi5U7MZdxZpDW_2gqP5y92rVXriquJc-zRsx4ZgxwepHMq01fQhna0gOaZbG3Dxn4",
-		label: "Sustainability Focus",
-		title: "THE OCEAN BOUND",
-		desc: "Made from 85% recycled marine plastics, this collection proves that performance and environmental responsibility go hand in hand.",
-		cta: "Explore Impact",
+		label: "Hướng đến bền vững",
+		title: "SINH RA TỪ ĐẠI DƯƠNG",
+		desc: "Làm từ 85% nhựa tái chế từ biển, bộ sưu tập này chứng minh rằng hiệu suất và trách nhiệm với môi trường có thể đi cùng nhau.",
+		cta: "Khám phá tác động",
 	},
 ];
 
@@ -46,7 +46,7 @@ export default function HomePage() {
 				<div className="absolute inset-0 bg-gradient-to-t from-on-surface/60 to-transparent" />
 				<div className="absolute inset-0 flex flex-col justify-end p-8 pb-16">
 					<span className="text-white/80 font-bold tracking-[0.3em] text-xs mb-2 uppercase">
-						Summer Series 2024
+						Bộ sưu tập Hè 2024
 					</span>
 					<h2 className="text-6xl font-black text-white tracking-tighter leading-[0.9] mb-8">
 						STEP INTO <br />
@@ -55,7 +55,7 @@ export default function HomePage() {
 					<Link
 						href="/shop"
 						className="btn w-full bg-primary-action text-white border-0 rounded-2xl normal-case font-black text-lg py-5 h-auto active:scale-[0.98] transition-transform">
-						Shop Sale
+						Mua ngay
 					</Link>
 				</div>
 			</section>
@@ -96,12 +96,12 @@ export default function HomePage() {
 			<section className="px-6 mb-16">
 				<div className="flex justify-between items-end mb-8">
 					<h3 className="text-3xl font-black tracking-tighter">
-						TRENDING NOW
+						XU HƯỚNg MỚI NHẤT
 					</h3>
 					<Link
 						href="/shop"
 						className="text-primary font-bold text-sm border-b-2 border-primary/20">
-						All
+						Tất cả
 					</Link>
 				</div>
 				<div className="grid grid-cols-2 gap-4">
@@ -133,7 +133,7 @@ export default function HomePage() {
 			{/* Editor's Picks */}
 			<section className="px-6 mb-16">
 				<h3 className="text-3xl font-black tracking-tighter mb-8 italic">
-					EDITOR&apos;S PICKS
+					ĐỀ XUẤT TỪ EDITOR
 				</h3>
 				<div className="space-y-8">
 					{EDITOR_PICKS.map((pick) => (

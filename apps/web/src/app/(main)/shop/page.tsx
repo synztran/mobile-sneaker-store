@@ -15,11 +15,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 // ─── Sort sheet ───────────────────────────────────────────────────────────────
 
 const SORT_OPTIONS: { value: SortOption; label: string; icon: string }[] = [
-	{ value: "newest", label: "Newest First", icon: "schedule" },
-	{ value: "price_asc", label: "Price: Low to High", icon: "arrow_upward" },
+	{ value: "newest", label: "Mới nhất", icon: "schedule" },
+	{ value: "price_asc", label: "Giá: Thấp đến Cao", icon: "arrow_upward" },
 	{
 		value: "price_desc",
-		label: "Price: High to Low",
+		label: "Giá: Cao đến Thấp",
 		icon: "arrow_downward",
 	},
 ];
@@ -42,7 +42,7 @@ function SortSheet({
 			<div className="fixed inset-x-4 bottom-4 z-[70] bg-white rounded-3xl shadow-2xl overflow-hidden">
 				<div className="flex justify-between items-center px-6 py-5 border-b border-outline-variant/20">
 					<h2 className="text-lg font-black text-on-surface">
-						Sort By
+						Sắp xếp theo
 					</h2>
 					<button
 						onClick={onClose}
@@ -117,7 +117,7 @@ function ActiveFilterPills({
 			<button
 				onClick={onClear}
 				className="text-[10px] font-bold text-outline underline">
-				Clear all
+				Xóa tất cả
 			</button>
 		</div>
 	);
@@ -200,7 +200,7 @@ export default function ShopPage() {
 			setTotal(data.total ?? 0);
 		} catch (e) {
 			setError(
-				e instanceof Error ? e.message : "Failed to load products",
+				e instanceof Error ? e.message : "Không thể tải sản phẩm",
 			);
 		} finally {
 			setLoading(false);
@@ -224,7 +224,7 @@ export default function ShopPage() {
 					</span>
 					<input
 						type="search"
-						placeholder="Search the archive..."
+						placeholder="Tìm kiếm sản phẩm..."
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
 						className="flex-1 bg-transparent text-on-surface placeholder:text-outline font-medium outline-none"
@@ -273,7 +273,7 @@ export default function ShopPage() {
 							<span className="material-symbols-outlined text-base">
 								swap_vert
 							</span>
-							SORT
+							SÂP XẾP
 						</button>
 					</div>
 				</div>
