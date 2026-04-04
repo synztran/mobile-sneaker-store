@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#D46A43",
+                    "on-primary": "#ffffff",
+                    "background": "#F5F3EF",
+                    "surface": "#FFFFFF",
+                    "on-surface": "#2D2B2A",
+                    "secondary": "#52652a",
+                    "on-secondary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "2xl": "1rem",
+                    "3xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .hero-gradient {
+            background: linear-gradient(0deg, rgba(45, 43, 42, 0.6) 0%, rgba(45, 43, 42, 0) 60%);
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-surface antialiased">
+<!-- TopAppBar from COMPONENTS_3 -->
+<nav class="fixed top-0 w-full z-50 bg-[#FBF9F5]/80 backdrop-blur-xl flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#2D2B2A] hover:opacity-70 transition-opacity active:scale-95 duration-200 cursor-pointer" data-icon="menu">menu</span>
+</div>
+<h1 class="text-xl font-black tracking-tighter text-[#2D2B2A] font-['Manrope']">SNEAKER LAB</h1>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#2D2B2A] hover:opacity-70 transition-opacity active:scale-95 duration-200 cursor-pointer" data-icon="shopping_cart">shopping_cart</span>
+</div>
+</nav>
+<main class="pt-16 pb-32">
+<!-- Bold Hero Section -->
+<section class="relative h-[80vh] w-full overflow-hidden">
+<img alt="Lifestyle Sneaker" class="absolute inset-0 w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtpDZmOa72mJwZiHc7Gg77fPcLuhbxIPBX5cRqrZHkVXYIaMJeBmgbVNGOXFTJli1m9LS-Ovtlyp5d3DcWQUU7qSBEs2pVodNV942EaBa2RP1Tpw_jzZ3pNdh5P0fO9LChMlRaqgX_o-SGqr62matzTKw6xyKZ0oLp1svcBxTH4goNnm5rI7x0bqEGgCz_ocja0lFD0ahUxYFCM0yodnsFNyRvlNMk-t_xbccC_dKBoeJI_iBO3KFnW_B5anLp4o3I6EffMyJgCXk"/>
+<div class="absolute inset-0 hero-gradient"></div>
+<div class="absolute inset-0 flex flex-col justify-end p-8 pb-16">
+<span class="text-white/80 font-bold tracking-[0.3em] text-xs mb-2 uppercase">Summer Series 2024</span>
+<h2 class="text-6xl font-black text-white tracking-tighter leading-[0.9] mb-8">STEP INTO <br/>THE LIGHT</h2>
+<button class="bg-[#D46A43] text-white w-full py-5 rounded-2xl font-black text-lg tracking-tight active:scale-[0.98] transition-transform">
+                    Shop Sale
+                </button>
+</div>
+</section>
+<!-- Quick Categories -->
+<section class="py-10">
+<div class="flex overflow-x-auto gap-6 px-6 hide-scrollbar">
+<div class="flex flex-col items-center gap-3 flex-shrink-0">
+<div class="w-20 h-20 bg-surface rounded-3xl flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-3xl" data-icon="directions_run">directions_run</span>
+</div>
+<span class="text-[10px] font-black tracking-widest uppercase opacity-60">Running</span>
+</div>
+<div class="flex flex-col items-center gap-3 flex-shrink-0">
+<div class="w-20 h-20 bg-surface rounded-3xl flex items-center justify-center shadow-sm border-2 border-primary/20">
+<span class="material-symbols-outlined text-3xl text-primary" data-icon="styler">styler</span>
+</div>
+<span class="text-[10px] font-black tracking-widest uppercase text-primary">Lifestyle</span>
+</div>
+<div class="flex flex-col items-center gap-3 flex-shrink-0">
+<div class="w-20 h-20 bg-surface rounded-3xl flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-3xl" data-icon="sports_basketball">sports_basketball</span>
+</div>
+<span class="text-[10px] font-black tracking-widest uppercase opacity-60">Basketball</span>
+</div>
+<div class="flex flex-col items-center gap-3 flex-shrink-0">
+<div class="w-20 h-20 bg-surface rounded-3xl flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-3xl" data-icon="fitness_center">fitness_center</span>
+</div>
+<span class="text-[10px] font-black tracking-widest uppercase opacity-60">Training</span>
+</div>
+<div class="flex flex-col items-center gap-3 flex-shrink-0">
+<div class="w-20 h-20 bg-surface rounded-3xl flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-3xl" data-icon="hiking">hiking</span>
+</div>
+<span class="text-[10px] font-black tracking-widest uppercase opacity-60">Outdoor</span>
+</div>
+</div>
+</section>
+<!-- Trending Now: Grid -->
+<section class="px-6 mb-16">
+<div class="flex justify-between items-end mb-8">
+<h3 class="text-3xl font-black tracking-tighter">TRENDING NOW</h3>
+<span class="text-primary font-bold text-sm border-b-2 border-primary/20">All</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface p-4 rounded-[2rem] shadow-sm">
+<div class="h-32 flex items-center justify-center mb-4">
+<img alt="Trending 1" class="w-full rotate-[-10deg]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCo6wgIBUS-cFOXbibGnGXwW3SIY0e-CUz2kGFQswvirZDHS9SgW78iwlc3B89JONaq1QB3uq3-bP9ZoLPwXdtZpE1qi17PctTyJaD5oq1Z8wJ0mvd_8Ny95kW3HAXoIvjRGUGAU8EISH1PIT9Fz6jcUw--Y-a1biQSQHqIcp0vfhJNqol3o3taRT1uK6s-JuS5d1w6qWrylFsLCbJ70cYVjz5BEJhiMU5SDBBwXCwbt2x7v1xVsy9coFcmqICDyGlT3Siayr6t5DA"/>
+</div>
+<h4 class="font-bold text-sm leading-tight mb-1">TERRA RUNNER</h4>
+<span class="text-primary font-black text-xs">$185.00</span>
+</div>
+<div class="bg-surface p-4 rounded-[2rem] shadow-sm">
+<div class="h-32 flex items-center justify-center mb-4">
+<img alt="Trending 2" class="w-full rotate-[-10deg]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA67PTtpgol5Ho2MG-eAEf_2CoCCwRt6dtsdPQN1Dy3jbattq6xqp0tfV4Kd2yZUEUjIaHWorzqV1ck4QY63JggRrSLhhLf7DXKLDaiLHfmJDpk64Y_ZWLhyEgt6DxmfX8atFn6t0XKwhrwsfmr366WaEb-HG3Nv_dPfTsrKlYXNWX7-_PsRSpD--4nY4mEEIEIOyi4lkIGYGPXuHZe4xZbVOqQP2Ug4FJyRbK9nxgPw4qy2DouOLGDyG54IWnFNX9NlUy8PyWilw0"/>
+</div>
+<h4 class="font-bold text-sm leading-tight mb-1">AERO-KNIT</h4>
+<span class="text-primary font-black text-xs">$210.00</span>
+</div>
+</div>
+</section>
+<!-- Editor's Picks: Storytelling cards -->
+<section class="px-6 mb-16">
+<h3 class="text-3xl font-black tracking-tighter mb-8 italic">EDITOR'S PICKS</h3>
+<div class="space-y-8">
+<div class="bg-surface rounded-[2.5rem] overflow-hidden shadow-sm">
+<div class="h-72 overflow-hidden">
+<img alt="Curated 1" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAoDnQ1ZNBd6nR7hQTeEZejpmgvfOJd-fM09mfsNKgBttUG_f9x0VhLxbv1abQ_URBdhfUEimvqny_6PijNE_kj99kz1zUeWdMATKbO75HcWAMxU1NZD-C7eSlGV25HwM4PUqzVm9r6uqoSq19Oyv3_1EtLCkrfb1rwZuh2GVM_6a_FYyCMs-oK5kKaQ89KTQ9zVGMrjcSoIwTktws5DjlByZWL96AT5XDUaUigJlB9FYbWv9czkLkO6MKIS-JgV-ptSo5X3qfyKS4"/>
+</div>
+<div class="p-8">
+<span class="text-primary font-black tracking-widest text-[10px] uppercase mb-3 block">Heritage Series</span>
+<h4 class="text-2xl font-black tracking-tight mb-4 leading-none">THE ARCHIVE REVIVAL</h4>
+<p class="text-on-surface/60 text-sm leading-relaxed mb-6">A curated selection of silhouettes that defined a generation, reconstructed with modern materials for the streets of today.</p>
+<button class="flex items-center gap-2 text-on-surface font-black text-sm uppercase tracking-widest">
+                            Discover Story <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<div class="bg-surface rounded-[2.5rem] overflow-hidden shadow-sm">
+<div class="h-72 overflow-hidden">
+<img alt="Curated 2" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADrUhneZqMRDzXgw4YvT3HrCEH5PlmpZ4mNAxxboeGGOAu2r5GUlGbsrI91odysx5_nYbgRU95AOZn5bjTd6LYaIfuK2Jrq_KCNUnsSI9N9pLy_vYj7xsL47X5RrrgvNt8bvHVZGfF334SWweu88na6oMwWhb38ZiUwVKureZUXuKamcvGBdHS-VXWhmz3fbd_vaxtSrwqFjHi5U7MZdxZpDW_2gqP5y92rVXriquJc-zRsx4ZgxwepHMq01fQhna0gOaZbG3Dxn4"/>
+</div>
+<div class="p-8">
+<span class="text-primary font-black tracking-widest text-[10px] uppercase mb-3 block">Sustainability Focus</span>
+<h4 class="text-2xl font-black tracking-tight mb-4 leading-none">THE OCEAN BOUND</h4>
+<p class="text-on-surface/60 text-sm leading-relaxed mb-6">Made from 85% recycled marine plastics, this collection proves that performance and environmental responsibility go hand in hand.</p>
+<button class="flex items-center gap-2 text-on-surface font-black text-sm uppercase tracking-widest">
+                            Explore Impact <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar from COMPONENTS_3 -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-[#FBF9F5]/80 backdrop-blur-xl rounded-t-[24px] z-50 shadow-[0_-4px_20px_rgba(155,63,28,0.06)]">
+<a class="flex flex-col items-center justify-center text-[#9B3F1C] bg-[#FFDBCF]/30 rounded-2xl px-6 py-2 active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home_app_logo" style="font-variation-settings: 'FILL' 1;">home_app_logo</span>
+<span class="font-['Manrope'] text-[10px] font-semibold uppercase tracking-widest">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#2D2B2A] opacity-60 hover:text-[#9B3F1C] transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="storefront">storefront</span>
+<span class="font-['Manrope'] text-[10px] font-semibold uppercase tracking-widest">Shop</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#2D2B2A] opacity-60 hover:text-[#9B3F1C] transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-['Manrope'] text-[10px] font-semibold uppercase tracking-widest">Profile</span>
+</a>
+</nav>
+<!-- Contextual Search FAB -->
+<div class="fixed bottom-24 right-6 z-40">
+<button class="w-16 h-16 bg-[#D46A43] text-white rounded-full shadow-2xl flex items-center justify-center active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="search">search</span>
+</button>
+</div>
+</body></html>
