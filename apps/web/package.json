@@ -27,6 +27,7 @@
     "autoprefixer": "^10.4.19",
     "daisyui": "^4.12.10",
     "postcss": "^8.4.39",
+    "sharp": "^0.34.5",
     "tailwindcss": "^3.4.6",
     "typescript": "^5.5.3"
   }
