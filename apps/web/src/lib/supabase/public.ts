@@ -1,19 +1,28 @@
 /**
  * Stateless Supabase client using only the anon key — no cookie/session
- * dependencies. Use this for reading public data (products, brands, etc.)
- * that is gated by RLS `to anon` policies.
+ * dependencies. Works in all contexts: server components, API routes, edge.
  *
- * Returns a new client per call to avoid module-level side effects that
- * interfere with Turbopack/edge chunking.
+ * Uses @supabase/supabase-js directly with persistSession: false so it never
+ * touches cookies, localStorage, or document — safe in Node.js API routes
+ * where createBrowserClient would fail.
+ *
+ * Called as a factory (not module-level) to avoid Turbopack chunking issues.
  */
 
-import { createBrowserClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types";
 
 export function getPublicClient() {
-	return createBrowserClient<Database>(
+	return createClient<Database>(
 		process.env.NEXT_PUBLIC_SUPABASE_URL ??
 			"https://placeholder.supabase.co",
 		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "placeholder-anon-key",
+		{
+			auth: {
+				persistSession: false,
+				autoRefreshToken: false,
+				detectSessionInUrl: false,
+			},
+		},
 	);
 }
