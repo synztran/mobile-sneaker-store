@@ -183,7 +183,7 @@ export default function PaymentPage() {
 									</h3>
 									<div className="flex items-center gap-2 mt-0.5">
 										<span className="text-xs text-outline font-semibold">
-											Size {item.size}
+											Size {item.size.label}
 										</span>
 										<span className="text-xs text-outline">
 											·

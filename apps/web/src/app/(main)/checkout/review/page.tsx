@@ -85,7 +85,7 @@ export default function ReviewPage() {
 									<span>
 										Size:{" "}
 										<strong className="text-on-surface">
-											{item.size}
+											{item.size.label}
 										</strong>
 									</span>
 									<span>
