@@ -179,7 +179,6 @@ export async function GET(
 		// so we cast to any here. The runtime shape is correct.
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const p = product as any;
-		console.log("p", p);
 
 		// ── Process Images ─────────────────────────────────────
 		const images = (p.product_images ?? [])
@@ -199,7 +198,6 @@ export async function GET(
 		const sizeMap = new Map<string, any>();
 
 		(p.product_variants ?? []).forEach((variant: any) => {
-			console.log("variant", variant);
 			const sizeRow = variant.sizes; // This comes from the join
 			const colorRow = variant.colors; // This comes from the join
 

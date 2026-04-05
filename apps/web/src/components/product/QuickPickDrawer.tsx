@@ -21,7 +21,6 @@ export function QuickPickDrawer({
 	isOpen,
 	onClose,
 }: QuickPickDrawerProps) {
-	console.log("product", product);
 	const [selectedColorIdx, setSelectedColorIdx] = useState(0);
 	const [selectedSize, setSelectedSize] = useState<number | null>(null);
 	const { addItem, openCart } = useCartStore();

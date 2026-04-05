@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { getPublicClient } from "@/lib/supabase/public";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -129,10 +129,9 @@ export async function GET(req: NextRequest) {
 		: [];
 
 	try {
-		const supabase = await createClient();
-
 		// Resolve brand name → id when provided
 		let brandId: number | null = null;
+		const supabase = getPublicClient();
 		if (brand) {
 			const { data: brandRow } = await supabase
 				.from("brands")

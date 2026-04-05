@@ -4,7 +4,7 @@
  */
 
 import type { ShopProduct } from "@/app/api/products/route";
-import { createClient } from "@/lib/supabase/server";
+import { getPublicClient } from "@/lib/supabase/public";
 
 // ─── Color name → hex ─────────────────────────────────────────────────────────
 
@@ -132,8 +132,7 @@ function shapeRow(p: RawListRow): ShopProduct {
  */
 export async function getNewestProducts(limit: number): Promise<ShopProduct[]> {
 	try {
-		const supabase = await createClient();
-		const { data, error } = await supabase
+		const { data, error } = await getPublicClient()
 			.from("products")
 			.select(
 				`id, slug, model_name, description, retail_price, resale_price, condition, created_at,
@@ -144,9 +143,18 @@ export async function getNewestProducts(limit: number): Promise<ShopProduct[]> {
 			.order("created_at", { ascending: false })
 			.limit(limit);
 
-		if (error || !data) return [];
+		if (error) {
+			console.error(
+				"[getNewestProducts] Supabase error:",
+				error.message,
+				error.code,
+			);
+			return [];
+		}
+		if (!data) return [];
 		return (data as unknown as RawListRow[]).map(shapeRow);
-	} catch {
+	} catch (err) {
+		console.error("[getNewestProducts] Unexpected error:", err);
 		return [];
 	}
 }

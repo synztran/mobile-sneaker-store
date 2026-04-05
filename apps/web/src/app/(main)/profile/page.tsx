@@ -20,8 +20,6 @@ export default function ProfilePage() {
 	const router = useRouter();
 	const { user, profile, loading, signOut, refreshProfile } = useAuth();
 
-	console.log(user, profile);
-
 	const [editing, setEditing] = useState(false);
 	const [saving, setSaving] = useState(false);
 	const [fullName, setFullName] = useState("");

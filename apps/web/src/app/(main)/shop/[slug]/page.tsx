@@ -87,8 +87,6 @@ export default function ProductPage({
 		[product, selectedColor],
 	);
 
-	console.log("variantsForColor", variantsForColor);
-
 	// Unique sizes for the selected color, sorted by id
 	const sizesForColor = useMemo(
 		() =>
@@ -115,8 +113,6 @@ export default function ProductPage({
 		[variantsForColor],
 	);
 
-	console.log("sizesForColor", sizesForColor);
-
 	useEffect(() => {
 		async function fetchProduct() {
 			try {
@@ -127,7 +123,6 @@ export default function ProductPage({
 				}
 				if (!res.ok) throw new Error("Failed to load product");
 				const data: ProductDetail = await res.json();
-				console.log(data);
 				setProduct(data);
 				setSelectedColor(data.colors[0] ?? null);
 			} catch {
@@ -212,8 +207,6 @@ export default function ProductPage({
 		product.images.length > 0
 			? product.images.map((i) => i.url)
 			: ["/placeholder.jpg"];
-
-	console.log("product", product);
 
 	return (
 		<>
