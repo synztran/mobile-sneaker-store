@@ -9,18 +9,28 @@ import {
 	ProductCard,
 	ProductCardSkeleton,
 } from "@/components/product/ProductCard";
+import Icon from "@/components/ui/Icon";
 import { formatVND } from "@/lib/currency";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowDown01, ArrowDown10, CalendarArrowUp } from "lucide-react";
+import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 
 // ─── Sort sheet ───────────────────────────────────────────────────────────────
 
-const SORT_OPTIONS: { value: SortOption; label: string; icon: string }[] = [
-	{ value: "newest", label: "Mới nhất", icon: "schedule" },
-	{ value: "price_asc", label: "Giá: Thấp đến Cao", icon: "arrow_upward" },
+const SORT_OPTIONS: {
+	value: SortOption;
+	label: string;
+	icon: string | ReactElement;
+}[] = [
+	{ value: "newest", label: "Mới nhất", icon: <CalendarArrowUp size={16} /> },
+	{
+		value: "price_asc",
+		label: "Giá: Thấp đến Cao",
+		icon: <ArrowDown01 size={16} />,
+	},
 	{
 		value: "price_desc",
 		label: "Giá: Cao đến Thấp",
-		icon: "arrow_downward",
+		icon: <ArrowDown10 size={16} />,
 	},
 ];
 
@@ -47,9 +57,10 @@ function SortSheet({
 					<button
 						onClick={onClose}
 						className="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center">
-						<span className="material-symbols-outlined text-on-surface text-xl">
-							close
-						</span>
+						<Icon
+							name="close"
+							className="text-on-surface text-xl"
+						/>
 					</button>
 				</div>
 				<div className="p-4 space-y-2 pb-8">
@@ -65,16 +76,19 @@ function SortSheet({
 									? "bg-primary/10 text-primary"
 									: "bg-surface-container-low text-on-surface hover:bg-surface-container"
 							}`}>
-							<span className="material-symbols-outlined text-xl">
-								{opt.icon}
-							</span>
+							{typeof opt.icon === "string" ? (
+								<Icon name={opt.icon} className="text-xl" />
+							) : (
+								opt.icon
+							)}
 							<span className="font-bold text-sm">
 								{opt.label}
 							</span>
 							{current === opt.value && (
-								<span className="material-symbols-outlined text-primary ml-auto text-xl">
-									check_circle
-								</span>
+								<Icon
+									name="check_circle"
+									className="text-primary ml-auto text-xl"
+								/>
 							)}
 						</button>
 					))}
@@ -199,9 +213,7 @@ export default function ShopPage() {
 			setProducts(data.products ?? []);
 			setTotal(data.total ?? 0);
 		} catch (e) {
-			setError(
-				e instanceof Error ? e.message : "Không thể tải sản phẩm",
-			);
+			setError(e instanceof Error ? e.message : "Không thể tải sản phẩm");
 		} finally {
 			setLoading(false);
 		}
@@ -217,11 +229,8 @@ export default function ShopPage() {
 	return (
 		<>
 			<div className="px-4 py-4 ">
-				{/* Search bar */}
-				<div className="flex items-center gap-3 bg-surface-container rounded-full px-5 py-3.5 mb-6">
-					<span className="material-symbols-outlined text-outline">
-						search
-					</span>
+				<div className="flex items-center gap-3 bg-surface-container rounded-full px-3 py-3.5 mb-6">
+					<Icon name="search" className="text-outline" />
 					<input
 						type="search"
 						placeholder="Tìm kiếm sản phẩm..."
@@ -233,9 +242,7 @@ export default function ShopPage() {
 						<button
 							onClick={() => setSearch("")}
 							className="text-outline">
-							<span className="material-symbols-outlined text-sm">
-								close
-							</span>
+							<Icon name="close" className="text-sm" />
 						</button>
 					)}
 				</div>
@@ -243,37 +250,36 @@ export default function ShopPage() {
 				{/* Header with filter/sort */}
 				<div className="flex justify-between items-center mb-4">
 					<div>
-						<p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">
-							COLLECTION
+						<p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-1">
+							Bộ sưu tập
 						</p>
-						<h2 className="text-3xl font-black tracking-tighter">
+						<h2 className="text-2xl font-black tracking-tighter">
 							{loading ? (
 								<span className="inline-block w-20 h-7 bg-surface-container rounded-full animate-pulse" />
 							) : (
-								`${total} Results`
+								`${total} kết quả`
 							)}
 						</h2>
 					</div>
 					<div className="flex gap-2">
 						<button
 							onClick={() => setShowFilter(true)}
-							className={`flex items-center gap-2 rounded-full px-4 py-2.5 font-bold text-sm transition-colors ${
+							className={`flex items-center gap-2 rounded-full px-4 py-2.5 font-bold text-xs transition-colors ${
 								filterApplied
 									? "bg-primary text-on-primary"
 									: "bg-surface-container text-on-surface"
 							}`}>
-							<span className="material-symbols-outlined text-base">
-								tune
-							</span>
-							FILTER
+							<Icon name="tune" className="text-base" />
+							Lọc
 						</button>
 						<button
 							onClick={() => setShowSort(true)}
-							className="flex items-center gap-2 primary-gradient text-white rounded-full px-4 py-2.5 font-bold text-sm">
-							<span className="material-symbols-outlined text-base">
-								swap_vert
-							</span>
-							SÂP XẾP
+							className="flex items-center gap-2 primary-gradient text-white rounded-full px-4 py-2.5 font-bold text-xs">
+							{SORT_OPTIONS.find((o) => o.value === sort)
+								?.icon ?? (
+								<Icon name="sort" className="text-sm" />
+							)}
+							Sắp xếp
 						</button>
 					</div>
 				</div>
@@ -289,9 +295,10 @@ export default function ShopPage() {
 				{/* Error state */}
 				{error && (
 					<div className="text-center py-8">
-						<span className="material-symbols-outlined text-4xl text-error">
-							error_outline
-						</span>
+						<Icon
+							name="error_outline"
+							className="text-4xl text-error"
+						/>
 						<p className="mt-2 text-on-surface-variant font-semibold">
 							{error}
 						</p>
@@ -320,12 +327,13 @@ export default function ShopPage() {
 				)}
 
 				{!loading && !error && products.length === 0 && (
-					<div className="text-center py-16">
-						<span className="material-symbols-outlined text-5xl text-outline-variant">
-							search_off
-						</span>
-						<p className="mt-3 text-on-surface-variant font-semibold">
-							No results found
+					<div className="flex justify-center items-center text-center py-16 gap-4">
+						<Icon
+							name="search_off"
+							className="text-2xl text-outline-variant"
+						/>
+						<p className="text-on-surface-variant font-semibold">
+							Không tìm thấy sản phẩm phù hợp
 						</p>
 					</div>
 				)}

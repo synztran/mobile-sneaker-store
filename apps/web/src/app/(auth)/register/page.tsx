@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/ui/Icon";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { toast } from "@/lib/toast";
 import Link from "next/link";
@@ -70,9 +71,7 @@ export default function RegisterPage() {
 			<form onSubmit={handleRegister} className="space-y-4 w-full">
 				{/* Full Name */}
 				<div className="flex items-center gap-3 bg-surface-container-lowest border border-outline-variant rounded-2xl px-5 py-4">
-					<span className="material-symbols-outlined text-outline text-xl">
-						person
-					</span>
+					<Icon name="person" className="text-outline text-xl" />
 					<input
 						type="text"
 						name="fullName"
@@ -86,9 +85,7 @@ export default function RegisterPage() {
 
 				{/* Email */}
 				<div className="flex items-center gap-3 bg-surface-container-lowest border border-outline-variant rounded-2xl px-5 py-4">
-					<span className="material-symbols-outlined text-outline text-xl">
-						mail
-					</span>
+					<Icon name="mail" className="text-outline text-xl" />
 					<input
 						type="email"
 						name="email"
@@ -102,9 +99,7 @@ export default function RegisterPage() {
 
 				{/* Password */}
 				<div className="flex items-center gap-3 bg-surface-container-lowest border border-outline-variant rounded-2xl px-5 py-4">
-					<span className="material-symbols-outlined text-outline text-xl">
-						lock
-					</span>
+					<Icon name="lock" className="text-outline text-xl" />
 					<input
 						type="password"
 						name="password"
@@ -118,9 +113,7 @@ export default function RegisterPage() {
 
 				{/* Confirm Password */}
 				<div className="flex items-center gap-3 bg-surface-container-lowest border border-outline-variant rounded-2xl px-5 py-4">
-					<span className="material-symbols-outlined text-outline text-xl">
-						lock
-					</span>
+					<Icon name="lock" className="text-outline text-xl" />
 					<input
 						type="password"
 						name="confirmPassword"
@@ -141,13 +134,13 @@ export default function RegisterPage() {
 						className="checkbox checkbox-sm mt-0.5 rounded border-outline-variant checked:bg-primary checked:border-primary"
 					/>
 					<span className="text-sm text-on-surface leading-relaxed">
-					Tôi đồng ý với{" "}
-					<Link href="#" className="underline underline-offset-2">
-						Điều khoản &amp; Điều kiện
-					</Link>{" "}
-					và{" "}
-					<Link href="#" className="underline underline-offset-2">
-						Chính sách bảo mật
+						Tôi đồng ý với{" "}
+						<Link href="#" className="underline underline-offset-2">
+							Điều khoản &amp; Điều kiện
+						</Link>{" "}
+						và{" "}
+						<Link href="#" className="underline underline-offset-2">
+							Chính sách bảo mật
 						</Link>
 					</span>
 				</label>

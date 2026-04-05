@@ -17,8 +17,13 @@ export interface ShopProduct {
 	retail_price: number | null;
 	min_price: number;
 	images: string[];
-	colors: { name: string; hex: string }[];
-	sizes: { size: number; available: boolean }[];
+	colors: { name: string; color_value: string; id: number | null }[];
+	sizes: {
+		label: string;
+		gender: string;
+		available: boolean;
+		id: number | null;
+	}[];
 	badge: "NEW" | "SALE" | "LIMITED" | null;
 }
 
@@ -57,13 +62,19 @@ type ImageRow = {
 	sort_order: number;
 };
 type VariantRow = {
-	size: string;
 	color: string;
-	color_id: number | null;
-	size_id: number | null;
+	color_id: number;
+	size_id: number;
 	price: number;
 	stock_quantity: number;
-	colors: { name: string; color_value: string } | null;
+	colors: { name: string; color_value: string; id: number | null } | null;
+	sizes: {
+		id: number;
+		name: string;
+		us_size: number | null;
+		gender: string;
+		available: boolean;
+	} | null;
 };
 
 type RawListRow = {
@@ -108,6 +119,7 @@ export async function GET(req: NextRequest) {
 	const priceMin = Number(sp.get("priceMin") ?? 0);
 	const priceMax = Number(sp.get("priceMax") ?? MAX_PRICE);
 	const sort = (sp.get("sort") as SortOption | null) ?? "newest";
+	const limit = sp.get("limit") ? Number(sp.get("limit")) : null;
 
 	const filterSizes = sizesParam
 		? sizesParam
@@ -117,7 +129,7 @@ export async function GET(req: NextRequest) {
 		: [];
 
 	try {
-		const supabase = createClient();
+		const supabase = await createClient();
 
 		// Resolve brand name → id when provided
 		let brandId: number | null = null;
@@ -142,7 +154,7 @@ export async function GET(req: NextRequest) {
 			`id, slug, model_name, description, retail_price, resale_price, condition, created_at,
 			 brands(id, name),
 			 product_images(image_url, is_primary, sort_order),
-			 product_variants(size, color, color_id, size_id, price, stock_quantity, colors(name, color_value))`,
+			 product_variants(color, color_id, size_id, price, stock_quantity, colors(name, color_value), sizes(id, name, us_size, gender))`,
 		);
 
 		if (search) query = query.ilike("model_name", `%${search}%`);
@@ -157,9 +169,7 @@ export async function GET(req: NextRequest) {
 		}
 
 		// ── Shape raw rows into ShopProduct ──────────────────────────────
-		let products: ShopProduct[] = (
-			(data ?? []) as unknown as RawListRow[]
-		).map((p) => {
+		let products = ((data ?? []) as unknown as RawListRow[]).map((p) => {
 			const brandInfo = p.brands;
 
 			const images = (p.product_images ?? [])
@@ -174,12 +184,12 @@ export async function GET(req: NextRequest) {
 
 			const uniqueColors = [...new Set(variants.map((v) => v.color))];
 			const uniqueSizes = [
-				...new Set(
+				...new Map(
 					variants
-						.map((v) => parseFloat(String(v.size).replace(/[^0-9.]/g, "")))
-						.filter((n) => !isNaN(n)),
-				),
-			].sort((a, b) => a - b);
+						.filter((v) => v.sizes)
+						.map((v) => [v.sizes!.id, v.sizes!]),
+				).values(),
+			].sort((a, b) => (a.us_size ?? 0) - (b.us_size ?? 0));
 
 			const minPrice =
 				variants.length > 0
@@ -210,17 +220,21 @@ export async function GET(req: NextRequest) {
 					const variant = variants.find((v) => v.color === name);
 					return {
 						name,
-						hex:
+						color_value:
 							variant?.colors?.color_value ??
 							COLOR_HEX[name] ??
-							"#9ca3af",
+							"",
+						id: variant?.color_id ?? null,
 					};
 				}),
-				sizes: uniqueSizes.map((size) => ({
-					size,
+				sizes: uniqueSizes.map((sizeRow) => ({
+					label: sizeRow.name ?? "",
+					gender: sizeRow.gender,
+					id: sizeRow.id || null,
+					size: sizeRow.us_size || null,
 					available: variants.some(
 						(v) =>
-							parseFloat(String(v.size).replace(/[^0-9.]/g, "")) === size && v.stock_quantity > 0,
+							v.sizes?.id === sizeRow.id && v.stock_quantity > 0,
 					),
 				})),
 				badge,
@@ -231,7 +245,7 @@ export async function GET(req: NextRequest) {
 		if (filterSizes.length > 0) {
 			products = products.filter((p) =>
 				filterSizes.some((fs) =>
-					p.sizes.some((s) => s.size === fs && s.available),
+					p.sizes.some((s) => s.id === fs && s.available),
 				),
 			);
 		}
@@ -259,9 +273,11 @@ export async function GET(req: NextRequest) {
 		}
 		// "newest" is already sorted by DB query
 
+		const sliced = limit && limit > 0 ? products.slice(0, limit) : products;
+
 		return NextResponse.json<ProductsResponse>({
-			products,
-			total: products.length,
+			products: sliced,
+			total: sliced.length,
 		});
 	} catch (err) {
 		return NextResponse.json(

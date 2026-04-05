@@ -1,6 +1,7 @@
 "use client";
 
 import type { ShopProduct } from "@/app/api/products/route";
+import Icon from "@/components/ui/Icon";
 import { formatVND } from "@/lib/currency";
 import Image from "next/image";
 import Link from "next/link";
@@ -94,9 +95,10 @@ export function ProductCard({ product }: ProductCardProps) {
 						</div>
 					) : (
 						<div className="absolute inset-0 flex items-center justify-center">
-							<span className="material-symbols-outlined text-4xl text-outline-variant">
-								image_not_supported
-							</span>
+							<Icon
+								name="image_not_supported"
+								className="text-4xl text-outline-variant"
+							/>
 						</div>
 					)}
 
@@ -105,27 +107,45 @@ export function ProductCard({ product }: ProductCardProps) {
 						onClick={handleQuickAdd}
 						aria-label={`Quick add ${product.model_name}`}
 						className="absolute bottom-3 right-3 z-20 w-9 h-9 rounded-full bg-on-surface text-surface flex items-center justify-center group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-200 shadow-lg active:scale-90">
-						<span className="material-symbols-outlined text-[18px]">
-							add_shopping_cart
-						</span>
+						<Icon
+							name="add_shopping_cart"
+							className="text-[18px]"
+						/>
 					</button>
 				</div>
 
 				{/* ── Details — outside the box ─────────────────────────── */}
 				<div className="space-y-1">
 					{/* Brand / series */}
-					<p className="text-xs font-bold uppercase tracking-[0.2em] text-primary leading-none">
+					<p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary leading-none">
 						{product.brand}
 					</p>
 
 					{/* Name */}
-					<h3 className="text-sm font-bold leading-tight text-on-surface uppercase">
+					<h3 className="text-sm font-bold leading-tight text-on-surface uppercase line-clamp-2 min-h-[35px]">
 						{product.model_name}
 					</h3>
 
+					{/* Color swatches */}
+					<div className="flex gap-1.5 pt-1.5">
+						{product.colors.slice(0, 4).map((c) => (
+							<span
+								key={c.name}
+								title={c.name}
+								className="w-5 h-5 rounded-full border border-outline-variant"
+								style={{ backgroundColor: c.color_value }}
+							/>
+						))}
+						{product.colors.length > 4 && (
+							<span className="text-[9px] font-semibold text-outline self-center">
+								+{product.colors.length - 4}
+							</span>
+						)}
+					</div>
+
 					{/* Price */}
-					<div className="flex items-baseline gap-2 pt-0.5">
-						<span className="text-sm font-extrabold text-on-surface">
+					<div className="flex items-baseline justify-end gap-2 pt-0.5">
+						<span className="text-base font-extrabold text-on-surface">
 							{formatVND(product.min_price)}
 						</span>
 						{product.retail_price &&
@@ -134,23 +154,6 @@ export function ProductCard({ product }: ProductCardProps) {
 									{formatVND(product.retail_price)}
 								</span>
 							)}
-					</div>
-
-					{/* Color swatches */}
-					<div className="flex gap-1.5 pt-1.5">
-						{product.colors.slice(0, 4).map((c) => (
-							<span
-								key={c.name}
-								title={c.name}
-								className="w-3 h-3 rounded-full border border-outline-variant"
-								style={{ backgroundColor: c.hex }}
-							/>
-						))}
-						{product.colors.length > 4 && (
-							<span className="text-[9px] font-semibold text-outline self-center">
-								+{product.colors.length - 4}
-							</span>
-						)}
 					</div>
 				</div>
 			</Link>

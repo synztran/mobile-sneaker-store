@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/ui/Icon";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { toast } from "@/lib/toast";
 import Link from "next/link";
@@ -41,9 +42,10 @@ export default function LoginPage() {
 			{/* Logo */}
 			<div className="flex flex-col items-center mb-12">
 				<div className="flex items-center gap-2 mb-2">
-					<span className="material-symbols-outlined text-5xl text-on-surface icon-filled">
-						sprint
-					</span>
+					<Icon
+						name="sprint"
+						className="text-5xl text-on-surface icon-filled"
+					/>
 				</div>
 				<h1 className="text-2xl font-black tracking-tighter text-on-surface font-sans">
 					SNEAKER LAB
@@ -58,10 +60,8 @@ export default function LoginPage() {
 			{/* Form */}
 			<form onSubmit={handleSignIn} className="space-y-4 w-full">
 				{/* Email */}
-				<div className="flex items-center gap-3 bg-white rounded-2xl px-5 py-4 shadow-ambient-sm">
-					<span className="material-symbols-outlined text-outline text-xl">
-						mail
-					</span>
+				<div className="flex items-center gap-3 bg-gray-200 rounded-2xl px-5 py-4 shadow-ambient-sm">
+					<Icon name="mail" className="text-outline text-xl" />
 					<input
 						type="email"
 						placeholder="Địa chỉ Email"
@@ -73,13 +73,11 @@ export default function LoginPage() {
 				</div>
 
 				{/* Password */}
-				<div className="flex items-center gap-3 bg-white rounded-2xl px-5 py-4 shadow-ambient-sm">
-					<span className="material-symbols-outlined text-outline text-xl">
-						lock
-					</span>
+				<div className="flex items-center gap-3 bg-gray-200 rounded-2xl px-5 py-4 shadow-ambient-sm">
+					<Icon name="lock" className="text-outline text-xl" />
 					<input
 						type={showPassword ? "text" : "password"}
-					placeholder="Mật khẩu"
+						placeholder="Mật khẩu"
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
 						className="flex-1 bg-transparent text-on-surface placeholder:text-outline font-medium outline-none"
@@ -89,9 +87,12 @@ export default function LoginPage() {
 						type="button"
 						onClick={() => setShowPassword(!showPassword)}
 						className="text-outline hover:text-on-surface transition-colors">
-						<span className="material-symbols-outlined text-xl">
-							{showPassword ? "visibility" : "visibility_off"}
-						</span>
+						<Icon
+							name={
+								showPassword ? "visibility" : "visibility_off"
+							}
+							className="text-xl"
+						/>
 					</button>
 				</div>
 
@@ -112,13 +113,12 @@ export default function LoginPage() {
 					{loading ? (
 						<span className="loading loading-spinner loading-sm" />
 					) : (
-					"Đăng nhập"
-				)}
-			</button>
-		</form>
+						"Đăng nhập"
+					)}
+				</button>
+			</form>
 
-			{/* Divider */}
-			<div className="flex items-center gap-4 my-6">
+			{/* <div className="flex items-center gap-4 my-6">
 				<div className="flex-1 h-px bg-outline-variant" />
 				<span className="text-sm text-on-surface-variant font-medium">
 					Hoặc tiếp tục với
@@ -126,7 +126,6 @@ export default function LoginPage() {
 				<div className="flex-1 h-px bg-outline-variant" />
 			</div>
 
-			{/* Social buttons */}
 			<div className="flex gap-4">
 				<button
 					type="button"
@@ -163,7 +162,7 @@ export default function LoginPage() {
 					</svg>
 					Apple
 				</button>
-			</div>
+			</div> */}
 
 			{/* Sign up link */}
 			<p className="text-center mt-8 text-on-surface text-sm">

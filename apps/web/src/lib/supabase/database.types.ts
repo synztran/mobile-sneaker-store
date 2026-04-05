@@ -15,6 +15,7 @@ export interface Database {
 					full_name: string | null;
 					avatar_url: string | null;
 					shipping_address: Json | null;
+					phone_number: string | null;
 					created_at: string;
 				};
 				Insert: {
@@ -31,6 +32,7 @@ export interface Database {
 					shipping_address?: Json | null;
 					created_at?: never;
 				};
+				Relationships: [];
 			};
 
 			brands: {
@@ -52,6 +54,7 @@ export interface Database {
 					logo_url?: string | null;
 					created_at?: never;
 				};
+				Relationships: [];
 			};
 
 			products: {
@@ -94,16 +97,17 @@ export interface Database {
 					created_at?: never;
 					updated_at?: string;
 				};
+				Relationships: [];
 			};
 
 			product_variants: {
 				Row: {
 					id: number;
 					product_id: number;
-					size: string;
+					// size: string;
 					color: string;
 					color_id: number | null;
-          size_id: number | null;           // ← NEW
+					size_id: number | null;
 					sku: string | null;
 					stock_quantity: number;
 					price: number;
@@ -112,10 +116,9 @@ export interface Database {
 				Insert: {
 					id?: never;
 					product_id: number;
-					size: string;
+					// size: string;
 					color: string;
 					color_id?: number | null;
-          size_id?: number | null;          // ← NEW
 					sku?: string | null;
 					stock_quantity?: number;
 					price: number;
@@ -124,15 +127,15 @@ export interface Database {
 				Update: {
 					id?: never;
 					product_id?: number;
-					size?: string;
+					// size?: string;
 					color?: string;
 					color_id?: number | null;
-          size_id?: number | null;          // ← NEW
 					sku?: string | null;
 					stock_quantity?: number;
 					price?: number;
 					created_at?: never;
 				};
+				Relationships: [];
 			};
 
 			product_images: {
@@ -160,6 +163,7 @@ export interface Database {
 					is_primary?: boolean;
 					sort_order?: number;
 				};
+				Relationships: [];
 			};
 
 			cart_items: {
@@ -184,6 +188,7 @@ export interface Database {
 					quantity?: number;
 					created_at?: never;
 				};
+				Relationships: [];
 			};
 
 			orders: {
@@ -232,6 +237,7 @@ export interface Database {
 					created_at?: never;
 					updated_at?: string;
 				};
+				Relationships: [];
 			};
 
 			order_items: {
@@ -256,6 +262,7 @@ export interface Database {
 					quantity?: number;
 					price_at_purchase?: number;
 				};
+				Relationships: [];
 			};
 
 			wishlist_items: {
@@ -277,6 +284,7 @@ export interface Database {
 					product_id?: never;
 					created_at?: never;
 				};
+				Relationships: [];
 			};
 
 			colors: {
@@ -304,35 +312,73 @@ export interface Database {
 					sort_order?: number | null;
 					created_at?: never;
 				};
+				Relationships: [];
 			};
-
-      sizes: {
-        Row: {
-          id: number;
-          name: string;
-          slug: string;
-          sort_order: number | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: never;
-          name: string;
-          slug: string;
-          sort_order?: number | null;
-          created_at?: string;
-        };
-        Update: {
-          id?: never;
-          name?: string;
-          slug?: string;
-          sort_order?: number | null;
-          created_at?: never;
-        };
-      };
+			fees: {
+				Row: {
+					id: number;
+					delivery_immediate_price: number;
+					delivery_basic_price: number;
+					insurance_fee: number;
+					packing_fee: number;
+					handling_fee: number;
+					updated_at: string;
+				};
+				Insert: {
+					id?: never;
+					delivery_immediate_price: number;
+					delivery_basic_price: number;
+					insurance_fee?: number;
+					packing_fee?: number;
+					handling_fee?: number;
+					updated_at?: string;
+				};
+				Update: {
+					id?: never;
+					delivery_immediate_price?: number;
+					delivery_basic_price?: number;
+					insurance_fee?: number;
+					packing_fee?: number;
+					handling_fee?: number;
+					updated_at?: string;
+				};
+				Relationships: [];
+			};
+			sizes: {
+				Row: {
+					id: number;
+					name: string; // e.g. "US 9 Men" or "US 7 Women"
+					slug: string;
+					gender: "men" | "women" | "unisex";
+					us_size: number | null;
+					sort_order: number | null;
+					created_at: string;
+				};
+				Insert: {
+					id?: never;
+					name: string;
+					slug: string;
+					gender: "men" | "women" | "unisex";
+					us_size?: number | null;
+					sort_order?: number | null;
+					created_at?: string;
+				};
+				Update: {
+					id?: never;
+					name?: string;
+					slug?: string;
+					gender?: "men" | "women" | "unisex";
+					us_size?: number | null;
+					sort_order?: number | null;
+					created_at?: never;
+				};
+				Relationships: [];
+			};
 		};
 		Views: Record<string, never>;
 		Functions: Record<string, never>;
 		Enums: Record<string, never>;
+		CompositeTypes: Record<string, never>;
 	};
 }
 
@@ -398,3 +444,11 @@ export type WishlistItemUpdate =
 export type Color = Database["public"]["Tables"]["colors"]["Row"];
 export type ColorInsert = Database["public"]["Tables"]["colors"]["Insert"];
 export type ColorUpdate = Database["public"]["Tables"]["colors"]["Update"];
+
+// Fees
+export type Fee = Database["public"]["Tables"]["fees"]["Row"];
+
+// Size
+export type Size = Database["public"]["Tables"]["sizes"]["Row"];
+export type SizeInsert = Database["public"]["Tables"]["sizes"]["Insert"];
+export type SizeUpdate = Database["public"]["Tables"]["sizes"]["Update"];

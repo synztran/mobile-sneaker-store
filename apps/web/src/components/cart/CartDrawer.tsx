@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/components/ui/Icon";
+import { useIsMounted } from "@/hooks/useIsMounted";
 import { formatVND } from "@/lib/currency";
 import { useCartStore } from "@/store";
 import Image from "next/image";
@@ -7,26 +9,28 @@ import Link from "next/link";
 import { useEffect } from "react";
 
 export function CartDrawer() {
+	const mounted = useIsMounted();
 	const { items, isOpen, closeCart, updateQty, removeItem, total } =
 		useCartStore();
-	const subtotal = total();
+	const subtotal = mounted ? total() : 0;
+	const visibleItems = mounted ? items : [];
+	const drawerOpen = mounted && isOpen;
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    }
+	useEffect(() => {
+		if (drawerOpen) {
+			document.body.style.overflow = "hidden";
+		}
 
-    return () => {
-      document.body.style.overflow = "";
-    }
-  }, [isOpen])
-
+		return () => {
+			document.body.style.overflow = "";
+		};
+	}, [drawerOpen]);
 
 	return (
 		<>
 			<div
 				className={`fixed inset-0 bg-on-surface/30 backdrop-blur-sm z-[60] transition-opacity duration-300 ${
-					isOpen
+					drawerOpen
 						? "opacity-100 pointer-events-auto"
 						: "opacity-0 pointer-events-none"
 				}`}
@@ -35,10 +39,9 @@ export function CartDrawer() {
 
 			{/* Drawer */}
 			<div
-				className={`fixed left-0 right-0 z-[999] bg-surface rounded-t-5xl shadow-ambient-lg max-h-[80vh] h-full flex flex-col transition-all duration-250 ease-out ${
-					isOpen ? "top-[20vh]" : "top-[100vh]"
-				}`}
-			>
+				className={`fixed left-0 right-0 z-[999] bg-surface rounded-t-5xl max-h-[80vh] h-full flex flex-col transition-all duration-250 ease-out ${
+					drawerOpen ? "top-[20vh]" : "top-[110vh]"
+				}`}>
 				{/* Handle */}
 				<div className="flex justify-center pt-3 pb-2">
 					<div className="w-10 h-1 bg-outline-variant rounded-full" />
@@ -47,30 +50,31 @@ export function CartDrawer() {
 				{/* Header */}
 				<div className="flex justify-between items-center px-6 py-4">
 					<h2 className="text-xl font-black tracking-tight text-on-surface">
-						YOUR BAG
+						Giỏ hàng của bạn
 					</h2>
 					<button
 						onClick={closeCart}
 						className="text-on-surface hover:opacity-70 transition-opacity active:scale-95">
-						<span className="material-symbols-outlined">close</span>
+						<Icon name="close" className="text-on-surface" />
 					</button>
 				</div>
 
 				{/* Items */}
 				<div className="flex-1 overflow-y-auto px-6 space-y-4 pb-4">
-					{items.length === 0 ? (
+					{visibleItems.length === 0 ? (
 						<div className="text-center py-12">
-							<span className="material-symbols-outlined text-5xl text-outline-variant">
-								shopping_bag
-							</span>
+							<Icon
+								name="shopping_bag"
+								className="text-5xl text-outline-variant"
+							/>
 							<p className="mt-3 text-on-surface-variant font-semibold">
 								Giỏ hàng trống
 							</p>
 						</div>
 					) : (
-						items.map((item) => (
+						visibleItems.map((item) => (
 							<div
-								key={`${item.product.id}-${item.size}-${item.color.name}`}
+								key={`${item.product.id}-${item.size.id}-${item.color.id}`}
 								className="flex gap-4 items-center bg-surface-container-low rounded-3xl p-3">
 								<div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-surface-container flex-shrink-0">
 									<Image
@@ -82,11 +86,11 @@ export function CartDrawer() {
 									/>
 								</div>
 								<div className="flex-1 min-w-0">
-									<p className="font-bold text-on-surface text-sm leading-tight truncate">
+									<p className="font-bold text-on-surface text-base leading-tight truncate">
 										{item.product.name}
 									</p>
-									<p className="text-xs text-on-surface-variant font-semibold uppercase tracking-wide mt-0.5">
-										CỠ: {item.size}
+									<p className="text-sm text-on-surface-variant font-semibold tracking-wide mt-0.5">
+										Size: {item.size.label}
 									</p>
 									<div className="flex items-center justify-between mt-2">
 										<div className="flex items-center gap-3 bg-surface-container rounded-full px-3 py-1.5">
@@ -94,8 +98,8 @@ export function CartDrawer() {
 												onClick={() =>
 													updateQty(
 														item.product.id,
-														item.size,
-														item.color.name,
+														item.size.id,
+														item.color.id,
 														-1,
 													)
 												}
@@ -109,8 +113,8 @@ export function CartDrawer() {
 												onClick={() =>
 													updateQty(
 														item.product.id,
-														item.size,
-														item.color.name,
+														item.size.id,
+														item.color.id,
 														1,
 													)
 												}
@@ -119,11 +123,10 @@ export function CartDrawer() {
 											</button>
 										</div>
 										<p className="text-primary font-black">
-											$
-											{(
+											{formatVND(
 												item.product.price *
-												item.quantity
-											).toFixed(0)}
+													item.quantity,
+											)}
 										</p>
 									</div>
 								</div>
@@ -132,25 +135,27 @@ export function CartDrawer() {
 					)}
 
 					{/* Sustainable packaging badge */}
-					{items.length > 0 && (
+					{visibleItems.length > 0 && (
 						<div className="flex items-center gap-3 bg-secondary/10 rounded-2xl px-4 py-3">
-							<span className="material-symbols-outlined text-secondary text-sm">
-								eco
-							</span>
+							<Icon
+								name="eco"
+								className="text-secondary text-sm"
+							/>
 							<p className="text-secondary text-xs font-bold uppercase tracking-wider">
-								Đơn hàng này được đóng gói thân thiện với môi trường.
+								Đơn hàng này được đóng gói thân thiện với môi
+								trường.
 							</p>
 						</div>
 					)}
 				</div>
 
 				{/* Footer */}
-				{items.length > 0 && (
+				{visibleItems.length > 0 && (
 					<div className="px-6 py-4 border-t border-outline-variant/20 bg-surface">
 						<div className="space-y-2 mb-4">
 							<div className="flex justify-between">
 								<span className="text-on-surface-variant text-sm">
-										Tạm tính
+									Tạm tính
 								</span>
 								<span className="font-semibold text-on-surface">
 									{formatVND(subtotal)}
@@ -158,7 +163,7 @@ export function CartDrawer() {
 							</div>
 							<div className="flex justify-between">
 								<span className="text-on-surface-variant text-sm">
-										Phí vận chuyển dự kiến
+									Phí vận chuyển dự kiến
 								</span>
 								<span className="font-semibold text-secondary">
 									Miễn phí

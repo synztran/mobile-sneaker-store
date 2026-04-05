@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/ui/Icon";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 
@@ -50,8 +51,21 @@ export function FilterOverlay({
 	const [selectedColor, setSelectedColor] = useState<string | null>(
 		init.color,
 	);
-	const [priceMin, setPriceMin] = useState(init.priceMin);
-	const [priceMax, setPriceMax] = useState(Math.min(init.priceMax, 500));
+	const MIN_PRICE = 0;
+	const MAX_PRICE = 500;
+	const MIN_GAP = 1;
+
+	const initMax = Math.min(init.priceMax ?? MAX_PRICE, MAX_PRICE);
+	const initMin = Math.max(
+		MIN_PRICE,
+		Math.min(
+			init.priceMin ?? MIN_PRICE,
+			Math.max(MIN_PRICE, initMax - MIN_GAP),
+		),
+	);
+
+	const [priceMin, setPriceMin] = useState<number>(initMin);
+	const [priceMax, setPriceMax] = useState<number>(initMax);
 
 	// Lock body scroll while overlay is mounted
 	useEffect(() => {
@@ -84,16 +98,17 @@ export function FilterOverlay({
 					<button
 						onClick={onClose}
 						className="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center hover:bg-surface-container-high transition-colors">
-						<span className="material-symbols-outlined text-on-surface text-xl">
-							close
-						</span>
+						<Icon
+							name="close"
+							className="text-on-surface text-xl"
+						/>
 					</button>
 				</div>
 
-				<div className="px-6 py-4 space-y-8 pb-24">
+				<div className="px-6 py-4 space-y-2 pb-24">
 					{/* Brand */}
 					<section>
-						<h3 className="font-black text-on-surface text-base mb-4">
+						<h3 className="font-black text-on-surface text-base mb-2">
 							Brand
 						</h3>
 						<div className="flex overflow-x-auto gap-4 hide-scrollbar pb-2">
@@ -124,47 +139,95 @@ export function FilterOverlay({
 					<div className="h-px bg-outline-variant/30" />
 
 					{/* Price Range */}
-					<section>
-						<h3 className="font-black text-on-surface text-base mb-4">
+					{/* <section>
+						<h3 className="font-black text-on-surface text-base mb-2">
 							Price Range
 						</h3>
-						<div className="space-y-4">
-							<input
-								type="range"
-								min={0}
-								max={500}
-								value={priceMax}
-								onChange={(e) =>
-									setPriceMax(Number(e.target.value))
-								}
-								className="range range-xs range-primary w-full"
-							/>
-							<div className="flex gap-4">
-								<div className="flex-1">
-									<p className="text-xs text-outline mb-1 font-semibold">
-										Min
-									</p>
-									<div className="border border-outline-variant rounded-xl px-4 py-2">
-										<span className="font-bold text-on-surface">
-											${priceMin}
-										</span>
-									</div>
+						<div className="space-y-2">
+							<div>
+								<div className="relative h-8">
+									<div className="absolute left-0 right-0 top-3 h-1 bg-outline-variant/30 rounded-full" />
+
+									{(() => {
+										const range = MAX_PRICE - MIN_PRICE;
+										const minPercent =
+											((priceMin - MIN_PRICE) / range) *
+											100;
+										const maxPercent =
+											((priceMax - MIN_PRICE) / range) *
+											100;
+										return (
+											<div
+												aria-hidden
+												className="absolute top-3 h-1 bg-primary rounded-full"
+												style={{
+													left: `${minPercent}%`,
+													right: `${100 - maxPercent}%`,
+												}}
+											/>
+										);
+									})()}
+
+									<input
+										type="range"
+										min={MIN_PRICE}
+										max={MAX_PRICE}
+										step={1}
+										value={priceMin}
+										onChange={(e) => {
+											const val = Math.min(
+												Number(e.target.value),
+												priceMax - MIN_GAP,
+											);
+											setPriceMin(val);
+										}}
+										className="w-full appearance-none bg-transparent h-8 relative z-20"
+									/>
+
+									<input
+										type="range"
+										min={MIN_PRICE}
+										max={MAX_PRICE}
+										step={1}
+										value={priceMax}
+										onChange={(e) => {
+											const val = Math.max(
+												Number(e.target.value),
+												priceMin + MIN_GAP,
+											);
+											setPriceMax(val);
+										}}
+										className="w-full appearance-none bg-transparent h-8 absolute top-0 left-0 z-30"
+									/>
 								</div>
-								<div className="flex-1">
-									<p className="text-xs text-outline mb-1 font-semibold">
-										Max
-									</p>
-									<div className="border border-outline-variant rounded-xl px-4 py-2">
-										<span className="font-bold text-on-surface">
-											${priceMax}
-										</span>
+
+								<div className="flex gap-4 mt-2">
+									<div className="flex-1">
+										<p className="text-xs text-outline mb-1 font-semibold">
+											Min
+										</p>
+										<div className="border border-outline-variant rounded-xl px-4 py-2">
+											<span className="font-bold text-on-surface">
+												${priceMin}
+											</span>
+										</div>
+									</div>
+									<div className="flex-1">
+										<p className="text-xs text-outline mb-1 font-semibold">
+											Max
+										</p>
+										<div className="border border-outline-variant rounded-xl px-4 py-2">
+											<span className="font-bold text-on-surface">
+												${priceMax}
+											</span>
+										</div>
 									</div>
 								</div>
 							</div>
 						</div>
-					</section>
+					</section> */}
 
-					<div className="h-px bg-outline-variant/30" />
+					{/* <div className="h-px bg-outline-variant/30" /> */}
 
 					{/* Size */}
 					<section>
@@ -226,7 +289,7 @@ export function FilterOverlay({
 				</div>
 
 				{/* Footer */}
-				<div className="sticky bottom-0 bg-white border-t border-outline-variant/20 flex items-center justify-between px-6 py-4">
+				<div className="absolute w-full bottom-0 bg-white border-t border-outline-variant/20 flex items-center justify-between px-6 py-4 mt-auto">
 					<button
 						onClick={() => {
 							setSelectedBrand(null);

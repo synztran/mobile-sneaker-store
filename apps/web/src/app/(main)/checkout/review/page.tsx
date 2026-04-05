@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/ui/Icon";
 import { SHIPPING_COST, TAX_RATE } from "@/lib/data";
 import { toast } from "@/lib/toast";
 import { useCartStore, useCheckoutStore } from "@/store";
@@ -13,7 +14,9 @@ export default function ReviewPage() {
 	const { shipping } = useCheckoutStore();
 
 	const subtotal = total();
-	const shippingCost = shipping ? SHIPPING_COST[shipping.deliverySpeed] : 0;
+	const shippingCost = shipping
+		? SHIPPING_COST[shipping.deliverySpeed as keyof typeof SHIPPING_COST]
+		: 0;
 	const tax = subtotal * TAX_RATE;
 	const orderTotal = subtotal + shippingCost + tax;
 
@@ -109,13 +112,12 @@ export default function ReviewPage() {
 				{/* Shipping */}
 				<div className="bg-surface-container rounded-xl p-5 space-y-3">
 					<div className="flex justify-between items-start">
-						<span className="material-symbols-outlined text-primary">
-							local_shipping
-						</span>
+						<Icon name="local_shipping" className="text-primary" />
 						<Link href="/checkout/shipping">
-							<span className="material-symbols-outlined text-outline-variant text-sm cursor-pointer">
-								edit
-							</span>
+							<Icon
+								name="edit"
+								className="text-outline-variant text-sm cursor-pointer"
+							/>
 						</Link>
 					</div>
 					<div className="space-y-1">
@@ -148,13 +150,12 @@ export default function ReviewPage() {
 				{/* Payment */}
 				<div className="bg-surface-container rounded-xl p-5 space-y-3">
 					<div className="flex justify-between items-start">
-						<span className="material-symbols-outlined text-primary">
-							qr_code_2
-						</span>
+						<Icon name="qr_code_2" className="text-primary" />
 						<Link href="/checkout/payment">
-							<span className="material-symbols-outlined text-outline-variant text-sm cursor-pointer">
-								edit
-							</span>
+							<Icon
+								name="edit"
+								className="text-outline-variant text-sm cursor-pointer"
+							/>
 						</Link>
 					</div>
 					<div className="space-y-1">
@@ -219,7 +220,7 @@ export default function ReviewPage() {
 				onClick={handlePlaceOrder}
 				className="btn w-full primary-gradient text-white border-0 rounded-full normal-case font-bold text-lg h-auto py-5 shadow-ambient active:scale-95 transition-all flex items-center justify-center gap-3">
 				<span>Place Order</span>
-				<span className="material-symbols-outlined">arrow_forward</span>
+				<Icon name="arrow_forward" />
 			</button>
 		</>
 	);

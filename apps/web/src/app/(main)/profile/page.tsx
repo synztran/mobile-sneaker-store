@@ -4,6 +4,8 @@ import { useAuth } from "@/lib/auth/AuthProvider";
 import { toast } from "@/lib/toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import Icon from "@/components/ui/Icon";
 
 const NAV_ITEMS = [
 	{ icon: "shopping_bag", label: "My Orders" },
@@ -16,12 +18,50 @@ const NAV_ITEMS = [
 
 export default function ProfilePage() {
 	const router = useRouter();
-	const { user, profile, loading, signOut } = useAuth();
+	const { user, profile, loading, signOut, refreshProfile } = useAuth();
+
+  console.log(user, profile)
+
+	const [editing, setEditing] = useState(false);
+	const [saving, setSaving] = useState(false);
+	const [fullName, setFullName] = useState("");
+	const inputRef = useRef<HTMLInputElement>(null);
+
+	useEffect(() => {
+		if (profile?.full_name) setFullName(profile.full_name);
+	}, [profile]);
 
 	const handleSignOut = async () => {
 		await signOut();
 		toast.success("Signed out");
 		router.push("/login");
+	};
+
+	const handleSave = async () => {
+		if (!fullName.trim()) return;
+		setSaving(true);
+		try {
+			const res = await fetch("/api/user/profile", {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ full_name: fullName.trim() }),
+			});
+			if (!res.ok) throw new Error("Failed to save");
+			await refreshProfile();
+			toast.success("Profile updated");
+			setEditing(false);
+		} catch {
+			toast.error("Could not save profile");
+		} finally {
+			setSaving(false);
+		}
+	};
+
+	const handleEditToggle = () => {
+		setEditing((v) => {
+			if (!v) setTimeout(() => inputRef.current?.focus(), 50);
+			return !v;
+		});
 	};
 
 	if (loading) {
@@ -59,14 +99,58 @@ export default function ProfilePage() {
 						</span>
 					</div>
 				)}
-				<div>
-					<h2 className="text-2xl font-black text-on-surface">
-						{displayName}
-					</h2>
-					<p className="text-on-surface-variant text-sm">
+				<div className="flex-1 min-w-0">
+					{editing ? (
+						<input
+							ref={inputRef}
+							value={fullName}
+							onChange={(e) => setFullName(e.target.value)}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") handleSave();
+								if (e.key === "Escape") setEditing(false);
+							}}
+							className="w-full bg-surface-container rounded-xl px-3 py-1.5 text-xl font-black text-on-surface outline-none border-2 border-primary"
+							placeholder="Your name"
+						/>
+					) : (
+						<h2 className="text-2xl font-black text-on-surface truncate">
+							{displayName}
+						</h2>
+					)}
+					<p className="text-on-surface-variant text-sm mt-0.5">
 						{user ? user.email : "Sneaker Lab Member"}
 					</p>
 				</div>
+				{user && (
+					<div className="flex gap-2 flex-shrink-0">
+						{editing ? (
+							<>
+								<button
+									onClick={handleSave}
+									disabled={saving}
+									className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center active:scale-90 transition-transform disabled:opacity-50">
+									{saving ? (
+										<span className="loading loading-spinner loading-xs text-white" />
+									) : (
+										<Icon name="check" className="text-white text-lg" />
+									)}
+								</button>
+								<button
+									onClick={() => setEditing(false)}
+									className="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center active:scale-90 transition-transform">
+									<Icon name="close" className="text-on-surface text-lg" />
+								</button>
+							</>
+						) : (
+							<button
+								onClick={handleEditToggle}
+								className="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center active:scale-90 transition-transform">
+								<Icon name="edit" className="text-on-surface text-lg" />
+							</button>
+						)}
+						)}
+					</div>
+				)}
 			</div>
 
 			{/* Menu items */}
@@ -75,15 +159,11 @@ export default function ProfilePage() {
 					<button
 						key={label}
 						className="w-full flex items-center gap-4 bg-surface-container-lowest rounded-2xl px-5 py-4 shadow-ambient-sm hover:bg-surface-container-low transition-colors">
-						<span className="material-symbols-outlined text-primary">
-							{icon}
-						</span>
+						<Icon name={icon} className="text-primary" />
 						<span className="font-semibold text-on-surface">
 							{label}
 						</span>
-						<span className="material-symbols-outlined text-outline-variant ml-auto">
-							chevron_right
-						</span>
+						<Icon name="chevron_right" className="text-outline-variant ml-auto" />
 					</button>
 				))}
 			</div>
@@ -94,9 +174,7 @@ export default function ProfilePage() {
 					<button
 						onClick={handleSignOut}
 						className="btn w-full bg-surface-container text-error border-0 rounded-2xl normal-case font-bold h-auto py-4">
-						<span className="material-symbols-outlined mr-2">
-							logout
-						</span>
+						<Icon name="logout" className="mr-2" />
 						Sign Out
 					</button>
 				) : (

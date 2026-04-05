@@ -7,7 +7,7 @@ export async function GET() {
 	const results: Record<string, unknown> = {};
 
 	try {
-		const supabase = createClient();
+		const supabase = await createClient();
 
 		// 1. Check auth service is reachable
 		const { error: authError } = await supabase.auth.getSession();

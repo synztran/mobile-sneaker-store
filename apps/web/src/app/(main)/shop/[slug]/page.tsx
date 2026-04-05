@@ -2,6 +2,7 @@
 
 import type { ProductDetail } from "@/app/api/products/[slug]/route";
 import { TopNav } from "@/components/layout/TopNav";
+import Icon from "@/components/ui/Icon";
 import { formatVND } from "@/lib/currency";
 import type { ColorOption, Product } from "@/lib/data";
 import { toast } from "@/lib/toast";
@@ -9,7 +10,7 @@ import { useCartStore } from "@/store";
 import clsx from "clsx";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useMemo, useRef, useState } from "react";
 
 // ─── Loading skeleton ─────────────────────────────────────────────────────────
 
@@ -49,18 +50,72 @@ function ProductDetailSkeleton() {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function ProductPage({ params }: { params: { slug: string } }) {
+export default function ProductPage({
+	params: paramsPromise,
+}: {
+	params: Promise<{ slug: string }>;
+}) {
+	const params = use(paramsPromise);
 	const [product, setProduct] = useState<ProductDetail | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [notFoundState, setNotFoundState] = useState(false);
 
-	const [selectedColor, setSelectedColor] = useState<string | null>(null);
-	const [selectedSize, setSelectedSize] = useState<number | null>(null);
+	const [selectedColor, setSelectedColor] = useState<{
+		name: string;
+		color_value: string;
+		id: number | null;
+	} | null>(null);
+	const [selectedSize, setSelectedSize] = useState<{
+		label: string;
+		id: number | null;
+		gender: string | null;
+	} | null>(null);
 	const [activeImage, setActiveImage] = useState(0);
 	const [saved, setSaved] = useState(false);
 	const touchStartX = useRef<number | null>(null);
 
 	const { addItem, openCart } = useCartStore();
+
+	// Variants available for the selected color
+	const variantsForColor = useMemo(
+		() =>
+			product && selectedColor
+				? product.variants.filter(
+						(v) => v.color?.id === selectedColor.id,
+					)
+				: (product?.variants ?? []),
+		[product, selectedColor],
+	);
+
+	console.log("variantsForColor", variantsForColor);
+
+	// Unique sizes for the selected color, sorted by id
+	const sizesForColor = useMemo(
+		() =>
+			variantsForColor
+				.reduce<
+					{
+						label: string | null;
+						available: boolean;
+						gender: string | null;
+						id: number | null;
+					}[]
+				>((acc, v) => {
+					if (!acc.find((a) => a.id === v.size.id)) {
+						acc.push({
+							label: v.size.label || null,
+							available: v.stock_quantity > 0,
+							gender: v.size.gender,
+							id: v.size.id,
+						});
+					}
+					return acc;
+				}, [])
+				.sort((a, b) => (a.id ?? 0) - (b.id ?? 0)),
+		[variantsForColor],
+	);
+
+	console.log("sizesForColor", sizesForColor);
 
 	useEffect(() => {
 		async function fetchProduct() {
@@ -72,8 +127,9 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 				}
 				if (!res.ok) throw new Error("Failed to load product");
 				const data: ProductDetail = await res.json();
+				console.log(data);
 				setProduct(data);
-				setSelectedColor(data.colors[0]?.name ?? null);
+				setSelectedColor(data.colors[0] ?? null);
 			} catch {
 				setNotFoundState(true);
 			} finally {
@@ -87,29 +143,25 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 	if (notFoundState) notFound();
 	if (!product) return null;
 
-	// Variants available for the selected color
-	const variantsForColor = selectedColor
-		? product.variants.filter((v) => v.color === selectedColor)
-		: product.variants;
-
 	// Price to display: selected size variant price, or min price
 	const displayVariant =
 		selectedSize !== null
-			? variantsForColor.find((v) => v.size === selectedSize)
+			? variantsForColor.find((v) => v.size?.id === selectedSize.id)
 			: null;
 	const displayPrice = displayVariant?.price ?? product.min_price;
 
 	const handleAddToCart = () => {
 		if (!selectedSize) {
-					toast.error("Vui lòng chọn cỡ");
+			toast.error("Vui lòng chọn cỡ");
 			return;
 		}
 
 		const colorObj = product.colors.find(
-			(c) => c.name === selectedColor,
+			(c) => c.id === selectedColor?.id,
 		) ?? {
 			name: "Default",
-			hex: "#9ca3af",
+			color_value: "#9ca3af",
+			id: null,
 		};
 
 		const cartColor: ColorOption = colorObj;
@@ -124,7 +176,12 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 			description: product.description ?? "",
 			story: "",
 			colors: product.colors,
-			sizes: product.sizes,
+			sizes: product.sizes.map((s) => ({
+				id: s.id,
+				label: s.name,
+				available: s.available,
+				gender: s.gender,
+			})),
 			images:
 				product.images.length > 0
 					? product.images.map((i) => i.url)
@@ -134,7 +191,19 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 			inStock: product.sizes.some((s) => s.available),
 		};
 
-		addItem(cartProduct, selectedSize, cartColor);
+		addItem(
+			cartProduct,
+			{
+				label: selectedSize.label,
+				id: selectedSize.id,
+				gender: selectedSize?.gender || "",
+			},
+			{
+				name: cartColor.name,
+				color_value: cartColor.color_value,
+				id: cartColor.id,
+			},
+		);
 		toast.success("Đã thêm vào giỏ!");
 		openCart();
 	};
@@ -143,6 +212,8 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 		product.images.length > 0
 			? product.images.map((i) => i.url)
 			: ["/placeholder.jpg"];
+
+	console.log("product", product);
 
 	return (
 		<>
@@ -158,9 +229,14 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 						}}
 						onTouchEnd={(e) => {
 							if (touchStartX.current === null) return;
-							const delta = touchStartX.current - e.changedTouches[0].clientX;
+							const delta =
+								touchStartX.current -
+								e.changedTouches[0].clientX;
 							if (Math.abs(delta) > 40) {
-								if (delta > 0) setActiveImage((p) => Math.min(p + 1, heroImages.length - 1));
+								if (delta > 0)
+									setActiveImage((p) =>
+										Math.min(p + 1, heroImages.length - 1),
+									);
 								else setActiveImage((p) => Math.max(p - 1, 0));
 							}
 							touchStartX.current = null;
@@ -232,7 +308,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 								</span>
 							)}
 						</div>
-						<h1 className="text-4xl font-black leading-[1.1] tracking-tighter text-on-surface mb-1 uppercase">
+						<h1 className="text-2xl font-black leading-[1.1] tracking-tighter text-on-surface mb-1 uppercase">
 							{product.model_name}
 						</h1>
 						<p className="text-sm font-bold text-primary mb-4">
@@ -258,7 +334,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 								Chọn màu sắc{" "}
 								{selectedColor && (
 									<span className="normal-case font-medium text-on-surface-variant ml-1">
-										— {selectedColor}
+										— {selectedColor.name}
 									</span>
 								)}
 							</h3>
@@ -267,17 +343,19 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 									<button
 										key={color.name}
 										onClick={() => {
-											setSelectedColor(color.name);
+											setSelectedColor(color);
 											setSelectedSize(null);
 										}}
 										title={color.name}
 										className={clsx(
 											"w-8 h-8 rounded-full border-2 transition-all",
-											selectedColor === color.name
+											selectedColor === color
 												? "border-on-surface scale-110"
 												: "border-transparent",
 										)}
-										style={{ backgroundColor: color.hex }}
+										style={{
+											backgroundColor: color.color_value,
+										}}
 									/>
 								))}
 							</div>
@@ -295,40 +373,30 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 							</button>
 						</div>
 						<div className="grid grid-cols-4 gap-3">
-							{variantsForColor
-								.reduce<{ size: number; available: boolean }[]>(
-									(acc, v) => {
-										if (
-											!acc.find((a) => a.size === v.size)
-										) {
-											acc.push({
-												size: v.size,
-												available: v.stock_quantity > 0,
-											});
-										}
-										return acc;
-									},
-									[],
-								)
-								.sort((a, b) => a.size - b.size)
-								.map(({ size, available }) => (
-									<button
-										key={size}
-										disabled={!available}
-										onClick={() => setSelectedSize(size)}
-										className={clsx(
-											"py-4 rounded-2xl text-sm font-bold transition-all",
-											!available &&
-												"opacity-30 cursor-not-allowed line-through",
-											selectedSize === size
-												? "bg-primary text-white shadow-ambient-sm"
-												: available
-													? "bg-surface-container text-on-surface hover:bg-surface-container-high"
-													: "bg-surface-container text-on-surface",
-										)}>
-										{size}
-									</button>
-								))}
+							{sizesForColor.map((size) => (
+								<button
+									key={size.id}
+									disabled={!size.available}
+									onClick={() =>
+										setSelectedSize({
+											label: size?.label || "",
+											id: size?.id,
+											gender: size.gender,
+										})
+									}
+									className={clsx(
+										"py-4 rounded-2xl text-sm font-bold transition-all",
+										!size.available &&
+											"opacity-30 cursor-not-allowed line-through",
+										selectedSize?.id === size.id
+											? "bg-primary text-white shadow-ambient-sm"
+											: size.available
+												? "bg-surface-container text-on-surface hover:bg-surface-container-high"
+												: "bg-surface-container text-on-surface",
+									)}>
+									{size.label}
+								</button>
+							))}
 						</div>
 					</section>
 
@@ -349,9 +417,10 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 						<div className="grid grid-cols-2 gap-4">
 							{product.condition && (
 								<div className="flex items-center gap-3">
-									<span className="material-symbols-outlined text-secondary text-2xl">
-										verified
-									</span>
+									<Icon
+										name="verified"
+										className="text-secondary text-2xl"
+									/>
 									<div>
 										<p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
 											Tình trạng
@@ -364,9 +433,10 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 							)}
 							{product.release_date && (
 								<div className="flex items-center gap-3">
-									<span className="material-symbols-outlined text-tertiary text-2xl">
-										calendar_month
-									</span>
+									<Icon
+										name="calendar_month"
+										className="text-tertiary text-2xl"
+									/>
 									<div>
 										<p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
 											Ngày ra mắt
@@ -385,24 +455,22 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 			</main>
 
 			{/* Bottom Action Bar */}
-			<div className="fixed bottom-0 left-0 right-0 z-[100] px-6 py-4 glass-nav border-t border-outline-variant/20 flex gap-4">
+			<div className="fixed bottom-0 left-0 right-0 z-[100] px-6 py-4 bg-gray-50 rounded-tr-2xl rounded-tl-2xl border-outline-variant/20 flex gap-4">
 				<button
 					onClick={() => setSaved(!saved)}
 					className="w-14 h-14 rounded-2xl bg-surface-container flex items-center justify-center flex-shrink-0 active:scale-95 transition-transform">
-					<span
+					<Icon
+						name="bookmark"
 						className={clsx(
-							"material-symbols-outlined text-2xl",
+							"text-2xl",
 							saved && "icon-filled text-primary",
-						)}>
-						bookmark
-					</span>
+						)}
+					/>
 				</button>
 				<button
 					onClick={handleAddToCart}
 					className="flex-1 btn primary-gradient text-white border-0 rounded-2xl normal-case font-bold text-base h-auto py-4 active:scale-[0.98] transition-transform shadow-ambient-sm">
-					<span className="material-symbols-outlined text-xl mr-2">
-						shopping_bag
-					</span>
+					<Icon name="shopping_bag" className="text-xl mr-2" />
 					THÊM VÀO GIỎ
 				</button>
 			</div>

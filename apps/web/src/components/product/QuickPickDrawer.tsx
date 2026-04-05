@@ -1,6 +1,7 @@
 "use client";
 
 import type { ShopProduct } from "@/app/api/products/route";
+import Icon from "@/components/ui/Icon";
 import { formatVND } from "@/lib/currency";
 import type { ColorOption, Product } from "@/lib/data";
 import { toast } from "@/lib/toast";
@@ -20,6 +21,7 @@ export function QuickPickDrawer({
 	isOpen,
 	onClose,
 }: QuickPickDrawerProps) {
+	console.log("product", product);
 	const [selectedColorIdx, setSelectedColorIdx] = useState(0);
 	const [selectedSize, setSelectedSize] = useState<number | null>(null);
 	const { addItem, openCart } = useCartStore();
@@ -50,8 +52,9 @@ export function QuickPickDrawer({
 		}
 
 		const cartColor: ColorOption = product.colors[selectedColorIdx] ?? {
-			name: "Default",
-			hex: "#9ca3af",
+			color_value: "#000000",
+			id: null,
+			name: "Unknown",
 		};
 
 		const cartProduct: Product = {
@@ -75,7 +78,21 @@ export function QuickPickDrawer({
 			inStock: product.sizes.some((s) => s.available),
 		};
 
-		addItem(cartProduct, selectedSize, cartColor);
+		const selectedSizeObj = product.sizes.find(
+			(s) => s.id === selectedSize,
+		);
+
+		if (!selectedSizeObj) return;
+
+		addItem(
+			cartProduct,
+			{
+				gender: selectedSizeObj.gender,
+				label: selectedSizeObj.label,
+				id: selectedSizeObj.id,
+			},
+			cartColor,
+		);
 		onClose();
 		openCart();
 		toast.success(`${product.model_name} added to cart`);
@@ -97,7 +114,7 @@ export function QuickPickDrawer({
 			{/* Drawer */}
 			<div
 				className={clsx(
-					"fixed left-0 right-0 bottom-0 z-[90] bg-surface rounded-t-5xl shadow-ambient-lg flex flex-col transition-transform duration-300 ease-out",
+					"fixed left-0 right-0 bottom-0 z-[90] bg-surface rounded-t-5xl flex flex-col transition-transform duration-300 ease-out",
 					isOpen ? "translate-y-0" : "translate-y-full",
 				)}>
 				{/* Handle */}
@@ -120,9 +137,10 @@ export function QuickPickDrawer({
 										unoptimized
 									/>
 								) : (
-									<span className="material-symbols-outlined text-2xl text-outline-variant">
-										image_not_supported
-									</span>
+									<Icon
+										name="image_not_supported"
+										className="text-2xl text-outline-variant"
+									/>
 								)}
 							</div>
 							<div className="flex-1 min-w-0">
@@ -139,9 +157,10 @@ export function QuickPickDrawer({
 							<button
 								onClick={onClose}
 								className="flex-shrink-0 w-8 h-8 rounded-full bg-surface-container flex items-center justify-center active:scale-90 transition-transform">
-								<span className="material-symbols-outlined text-[18px] text-on-surface">
-									close
-								</span>
+								<Icon
+									name="close"
+									className="text-[18px] text-on-surface"
+								/>
 							</button>
 						</div>
 
@@ -151,7 +170,8 @@ export function QuickPickDrawer({
 								<p className="text-[10px] font-black uppercase tracking-widest text-on-surface mb-3">
 									Color{" "}
 									<span className="normal-case font-medium text-on-surface-variant">
-										— {product.colors[selectedColorIdx]?.name}
+										—{" "}
+										{product.colors[selectedColorIdx]?.name}
 									</span>
 								</p>
 								<div className="flex gap-3 flex-wrap">
@@ -169,7 +189,9 @@ export function QuickPickDrawer({
 													? "border-on-surface scale-110"
 													: "border-transparent",
 											)}
-											style={{ backgroundColor: c.hex }}
+											style={{
+												backgroundColor: c.color_value,
+											}}
 										/>
 									))}
 								</div>
@@ -184,25 +206,23 @@ export function QuickPickDrawer({
 							<div className="grid grid-cols-4 gap-2">
 								{product.sizes
 									.slice()
-									.sort((a, b) => a.size - b.size)
-									.map(({ size, available }) => (
+									.sort((a, b) => (a?.id ?? 0) - (b?.id ?? 0))
+									.map(({ id, label, available }) => (
 										<button
-											key={size}
+											key={id}
 											disabled={!available}
-											onClick={() =>
-												setSelectedSize(size)
-											}
+											onClick={() => setSelectedSize(id)}
 											className={clsx(
 												"py-3 rounded-2xl text-sm font-bold transition-all",
 												!available &&
 													"opacity-30 cursor-not-allowed line-through",
-												selectedSize === size
+												selectedSize === id
 													? "bg-primary text-white shadow-ambient-sm"
 													: available
 														? "bg-surface-container text-on-surface"
 														: "bg-surface-container text-on-surface",
 											)}>
-											{size}
+											{label}
 										</button>
 									))}
 							</div>

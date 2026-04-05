@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import Icon from "@/components/ui/Icon";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -8,11 +8,21 @@ const steps = [
 	{
 		href: "/checkout/shipping",
 		icon: "local_shipping",
-		label: "SHIPPING",
+		label: "Thiết lập",
 		step: 1,
 	},
-	{ href: "/checkout/payment", icon: "payments", label: "PAYMENT", step: 2 },
-	{ href: "/checkout/review", icon: "rate_review", label: "REVIEW", step: 3 },
+	{
+		href: "/checkout/payment",
+		icon: "payments",
+		label: "Thanh toán",
+		step: 2,
+	},
+	{
+		href: "/checkout/review",
+		icon: "rate_review",
+		label: "Tổng kết",
+		step: 3,
+	},
 ];
 
 export default function CheckoutLayout({
@@ -28,57 +38,63 @@ export default function CheckoutLayout({
 	return (
 		<div className="min-h-screen bg-background">
 			{/* TopAppBar */}
-			<nav className="fixed top-0 w-full z-50 glass-nav flex items-center justify-between px-6 py-4">
-				<Link
-					href="/"
-					className="hover:opacity-70 transition-opacity active:scale-95 duration-200">
-					<span className="material-symbols-outlined text-primary">
-						arrow_back
-					</span>
-				</Link>
-				<h1 className="font-sans font-bold tracking-tight uppercase text-lg text-on-surface">
-					CHECKOUT
-				</h1>
-				<Link
-					href="/shop"
-					className="hover:opacity-70 transition-opacity active:scale-95 duration-200">
-					<span className="material-symbols-outlined text-primary">
-						shopping_bag
-					</span>
-				</Link>
+			<nav className="fixed top-0 w-full z-50">
+				<div className="glass-nav flex items-center justify-between px-6 py-4">
+					<Link
+						href="/"
+						className="hover:opacity-70 transition-opacity active:scale-95 duration-200">
+						<Icon name="arrow_back" className="text-primary" />
+					</Link>
+					<h1 className="font-sans font-bold tracking-tight uppercase text-lg text-on-surface">
+						CHECKOUT
+					</h1>
+					<Link
+						href="/shop"
+						className="hover:opacity-70 transition-opacity active:scale-95 duration-200">
+						<Icon name="shopping_bag" className="text-primary" />
+					</Link>
+				</div>
+
+				{/* DaisyUI Steps bar */}
+				<div className="glass-nav border-t border-outline-variant/10 px-4 py-2">
+					<ul className="steps steps-horizontal w-full">
+						{steps.map(({ href, label, step, icon }) => {
+							const idx = step - 1;
+							const isPast = idx < currentStep;
+							const isActive = idx === currentStep;
+							const canNavigate = isPast;
+
+							return (
+								<li
+									key={href}
+									data-content={isPast ? "✓" : String(step)}
+									className={[
+										"step text-[10px] font-bold uppercase tracking-widest",
+										isPast || isActive
+											? "step-primary"
+											: "",
+									]
+										.filter(Boolean)
+										.join(" ")}>
+									{canNavigate ? (
+										<Link
+											href={href}
+											className="flex flex-col items-center gap-0.5">
+											{label}
+										</Link>
+									) : (
+										<span className="flex flex-col items-center gap-0.5">
+											{label}
+										</span>
+									)}
+								</li>
+							);
+						})}
+					</ul>
+				</div>
 			</nav>
 
-			<main className="pt-20 pb-32 px-6 max-w-2xl mx-auto">
-				{children}
-			</main>
-
-			{/* Bottom Step Nav */}
-			<nav className="fixed bottom-0 left-0 w-full h-20 glass-nav flex justify-around items-center px-8 rounded-t-3xl z-50 shadow-float">
-				{steps.map(({ href, icon, label, step }) => {
-					const idx = step - 1;
-					const isActive = pathname.includes(href.split("/").pop()!);
-					const isPast = currentStep > idx;
-
-					return (
-						<Link
-							key={href}
-							href={isPast ? href : "#"}
-							className={clsx(
-								"flex flex-col items-center justify-center px-5 py-2 rounded-full transition-all",
-								isActive
-									? "bg-primary text-white"
-									: "text-on-surface/40",
-							)}>
-							<span className="material-symbols-outlined text-[20px]">
-								{icon}
-							</span>
-							<span className="font-sans text-[10px] font-semibold uppercase tracking-widest mt-0.5">
-								{label}
-							</span>
-						</Link>
-					);
-				})}
-			</nav>
+			<main className="mt-36 pb-18 px-4 w-full mx-auto">{children}</main>
 		</div>
 	);
 }

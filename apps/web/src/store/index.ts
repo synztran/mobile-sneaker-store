@@ -1,5 +1,3 @@
-"use client";
-
 import type {
 	CartItem,
 	ColorOption,
@@ -11,13 +9,22 @@ import { persist } from "zustand/middleware";
 
 interface CartStore {
 	items: CartItem[];
+	totalPrice: number;
 	isOpen: boolean;
-	addItem: (product: Product, size: number, color: ColorOption) => void;
-	removeItem: (productId: string, size: number, colorName: string) => void;
+	addItem: (
+		product: Product,
+		size: CartItem["size"],
+		color: ColorOption,
+	) => void;
+	removeItem: (
+		productId: string,
+		sizeId: number | null,
+		colorId: number | null,
+	) => void;
 	updateQty: (
 		productId: string,
-		size: number,
-		colorName: string,
+		sizeId: number | null,
+		colorId: number | null,
 		delta: number,
 	) => void;
 	clearCart: () => void;
@@ -31,6 +38,7 @@ export const useCartStore = create<CartStore>()(
 	persist(
 		(set, get) => ({
 			items: [],
+			totalPrice: 0,
 			isOpen: false,
 
 			addItem: (product, size, color) => {
@@ -38,15 +46,15 @@ export const useCartStore = create<CartStore>()(
 					const existing = state.items.find(
 						(i) =>
 							i.product.id === product.id &&
-							i.size === size &&
-							i.color.name === color.name,
+							i.size.id === size.id &&
+							i.color.id === color.id,
 					);
 					if (existing) {
 						return {
 							items: state.items.map((i) =>
 								i.product.id === product.id &&
-								i.size === size &&
-								i.color.name === color.name
+								i.size.id === size.id &&
+								i.color.id === color.id
 									? { ...i, quantity: i.quantity + 1 }
 									: i,
 							),
@@ -61,26 +69,26 @@ export const useCartStore = create<CartStore>()(
 				});
 			},
 
-			removeItem: (productId, size, colorName) => {
+			removeItem: (productId, sizeId, colorId) => {
 				set((state) => ({
 					items: state.items.filter(
 						(i) =>
 							!(
 								i.product.id === productId &&
-								i.size === size &&
-								i.color.name === colorName
+								i.size.id === sizeId &&
+								i.color.id === colorId
 							),
 					),
 				}));
 			},
 
-			updateQty: (productId, size, colorName, delta) => {
+			updateQty: (productId, sizeId, colorId, delta) => {
 				set((state) => ({
 					items: state.items
 						.map((i) =>
 							i.product.id === productId &&
-							i.size === size &&
-							i.color.name === colorName
+							i.size.id === sizeId &&
+							i.color.id === colorId
 								? {
 										...i,
 										quantity: Math.max(
@@ -94,7 +102,7 @@ export const useCartStore = create<CartStore>()(
 				}));
 			},
 
-			clearCart: () => set({ items: [] }),
+			clearCart: () => set({ items: [], totalPrice: 0 }),
 			openCart: () => set({ isOpen: true }),
 			closeCart: () => set({ isOpen: false }),
 
@@ -107,18 +115,26 @@ export const useCartStore = create<CartStore>()(
 			itemCount: () =>
 				get().items.reduce((sum, i) => sum + i.quantity, 0),
 		}),
-		{ name: "sneaker-lab-cart" },
+		{ name: "sneaker-lab-cart", skipHydration: true },
 	),
 );
 
 interface CheckoutStore {
 	shipping: ShippingDetails | null;
-	setShipping: (data: ShippingDetails) => void;
-	orderId: string;
+	deliveryFee: number;
+	setShipping: (data: ShippingDetails, deliveryFee: number) => void;
+	clearCheckout: () => void;
 }
 
-export const useCheckoutStore = create<CheckoutStore>((set) => ({
-	shipping: null,
-	orderId: `SNKR-${Math.floor(1000 + Math.random() * 9000)}`,
-	setShipping: (data) => set({ shipping: data }),
-}));
+export const useCheckoutStore = create<CheckoutStore>()(
+	persist(
+		(set) => ({
+			shipping: null,
+			deliveryFee: 0,
+			setShipping: (data, deliveryFee) =>
+				set({ shipping: data, deliveryFee }),
+			clearCheckout: () => set({ shipping: null, deliveryFee: 0 }),
+		}),
+		{ name: "sneaker-lab-checkout" },
+	),
+);

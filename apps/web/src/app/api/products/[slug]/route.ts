@@ -9,12 +9,27 @@ export interface ProductVariantDetail {
 	id: number;
 	color_id: number | null;
 	size_id: number | null;
-	size: number;
-	color: string;
-	color_hex: string;
+	size: {
+		label: string;
+		gender: string;
+		id: number | null;
+	};
+	color: {
+		name: string;
+		color_value: string;
+		id: number | null;
+	};
 	price: number;
 	stock_quantity: number;
 	sku: string | null;
+}
+
+export interface ProductSize {
+	id: number | null;
+	name: string;
+	us_size: number;
+	available: boolean;
+	gender: string;
 }
 
 export interface ProductDetail {
@@ -30,8 +45,12 @@ export interface ProductDetail {
 	release_date: string | null;
 	images: { url: string; alt: string | null; is_primary: boolean }[];
 	variants: ProductVariantDetail[];
-	colors: { name: string; hex: string }[];
-	sizes: { size: number; available: boolean }[];
+	colors: {
+		name: string;
+		color_value: string;
+		id: number | null;
+	}[];
+	sizes: ProductSize[];
 	min_price: number;
 	badge: "NEW" | "SALE" | "LIMITED" | null;
 }
@@ -85,7 +104,15 @@ type RawProductRow = {
 		price: number;
 		stock_quantity: number;
 		sku: string | null;
-		colors: { name: string; color_value: string } | null;
+		colors: { name: string; color_value: string }[] | null;
+		sizes:
+			| {
+					available: boolean;
+					name: string;
+					us_size: number;
+					gender: string;
+			  }[]
+			| null;
 	}[];
 };
 
@@ -93,10 +120,9 @@ type RawProductRow = {
 
 export async function GET(
 	_req: NextRequest,
-	{ params }: { params: { slug: string } },
+	{ params }: { params: Promise<{ slug: string }> },
 ) {
-	const { slug } = params;
-
+	const { slug } = await params;
 	if (!slug) {
 		return NextResponse.json(
 			{ error: "Slug is required" },
@@ -105,17 +131,34 @@ export async function GET(
 	}
 
 	try {
-		const supabase = createClient();
+		const supabase = await createClient();
 
-		const { data: rawData, error } = await supabase
+		const { data: product, error } = await supabase
 			.from("products")
 			.select(
-				`id, slug, model_name, description, retail_price, resale_price,
-				 condition, release_date, brand_id,
-				 brands(id, name),
-				 product_images(image_url, alt_text, is_primary, sort_order),
-				 product_variants(id, size, color, color_id, size_id, price, stock_quantity, sku, colors(name, color_value))`,
-
+				`
+          id,
+          slug,
+          model_name,
+          description,
+          retail_price,
+          resale_price,
+          condition,
+          release_date,
+          brand_id,
+          brands(id, name),
+          product_images(image_url, alt_text, is_primary, sort_order),
+          product_variants(
+            id,
+            color_id,
+            size_id,
+            price,
+            stock_quantity,
+            sku,
+            colors(id, name, color_value),
+            sizes(id, name, us_size, gender)
+          )
+        `,
 			)
 			.eq("slug", slug)
 			.limit(1)
@@ -125,107 +168,145 @@ export async function GET(
 			return NextResponse.json({ error: error.message }, { status: 500 });
 		}
 
-		if (!rawData) {
+		if (!product) {
 			return NextResponse.json(
 				{ error: "Product not found" },
 				{ status: 404 },
 			);
 		}
 
-		const data = rawData as unknown as RawProductRow;
+		// FK-hint selects produce a type Supabase can't infer from Relationships:[],
+		// so we cast to any here. The runtime shape is correct.
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const p = product as any;
+		console.log("p", p);
 
-		// ── Shape images ──────────────────────────────────────────────────
-		const images = (data.product_images ?? [])
+		// ── Process Images ─────────────────────────────────────
+		const images = (p.product_images ?? [])
 			.sort(
-				(a, b) =>
+				(a: any, b: any) =>
 					(b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0) ||
-					a.sort_order - b.sort_order,
+					(a.sort_order ?? 0) - (b.sort_order ?? 0),
 			)
-			.map((i) => ({
+			.map((i: any) => ({
 				url: i.image_url,
 				alt: i.alt_text,
 				is_primary: i.is_primary,
 			}));
 
-		// ── Shape variants ────────────────────────────────────────────────
-		const variants: ProductVariantDetail[] = (
-			data.product_variants ?? []
-		).map((v) => ({
-			id: v.id,
-			color_id: v.color_id,
-			size_id: v.size_id,
-			size: parseFloat(String(v.size).replace(/[^0-9.]/g, "")),
-			color: v.color,
-			color_hex: v.colors?.color_value ?? COLOR_HEX[v.color] ?? "#9ca3af",
-			price: v.price,
-			stock_quantity: v.stock_quantity,
-			sku: v.sku,
-		})).filter((v) => !isNaN(v.size));
+		// ── Process Variants + Sizes (Much Cleaner) ─────────────
+		const variants: ProductVariantDetail[] = [];
+		const sizeMap = new Map<string, any>();
 
-		// ── Derived helpers ───────────────────────────────────────────────
-		const uniqueColors = [
-			...new Map(
-				variants.map((v) => [
-					v.color,
-					{ name: v.color, hex: v.color_hex },
-				]),
-			).values(),
-		];
+		(p.product_variants ?? []).forEach((variant: any) => {
+			console.log("variant", variant);
+			const sizeRow = variant.sizes; // This comes from the join
+			const colorRow = variant.colors; // This comes from the join
 
-		// Build size list sorted numerically
-		const uniqueSizes = [
-			...new Map(
+			const sizeLabel = sizeRow?.name ?? "Unknown Size";
+			const numericSize = sizeRow?.us_size ?? null;
+			const gender = sizeRow?.gender ?? null;
+
+			variants.push({
+				id: variant.id,
+				color_id: variant.color_id,
+				color: colorRow,
+				size_id: variant.size_id,
+				size: {
+					label: sizeLabel,
+					gender: gender,
+					id: variant.size_id,
+				},
+				price: variant.price,
+				stock_quantity: variant.stock_quantity,
+				sku: variant.sku,
+			});
+
+			// Build unique sizes for display (with gender)
+			if (sizeRow?.name) {
+				const key = `${sizeRow.name}-${sizeRow.gender || "unisex"}`;
+				if (!sizeMap.has(key)) {
+					sizeMap.set(key, {
+						size:
+							numericSize ||
+							parseFloat(
+								String(variant.sizes).replace(/[^0-9.]/g, ""),
+							) ||
+							0,
+						name: sizeLabel, // "US 9 Men"
+						gender: sizeRow.gender,
+						available: variant.stock_quantity > 0,
+						size_id: sizeRow.id,
+					});
+				} else if (variant.stock_quantity > 0) {
+					sizeMap.get(key).available = true;
+				}
+			}
+		});
+
+		const uniqueSizes = Array.from(sizeMap.values()).sort((a, b) => {
+			if (a.sizes !== b.sizes) return a.sizes - b.sizes;
+			return (a.gender ?? "").localeCompare(b.gender ?? "");
+		});
+
+		// Unique Colors
+		const uniqueColors = Array.from(
+			new Map(
 				variants.map((v) => [
-					v.size,
+					v.color_id,
 					{
-						size: v.size,
-						available: variants.some(
-							(vv) => vv.size === v.size && vv.stock_quantity > 0,
-						),
+						name: v.color?.name,
+						color_value: v.color?.color_value,
+						id: v.color_id,
 					},
 				]),
 			).values(),
-		].sort((a, b) => a.size - b.size);
+		);
 
 		const minPrice =
 			variants.length > 0
 				? Math.min(...variants.map((v) => v.price))
-				: (data.resale_price ?? data.retail_price ?? 0);
+				: (p.resale_price ?? p.retail_price ?? 0);
 
-		let badge: ProductDetail["badge"] = null;
-		if (data.condition === "deadstock") badge = "LIMITED";
-		else if (data.condition === "new") badge = "NEW";
-		else if (
-			data.retail_price &&
-			data.resale_price &&
-			data.resale_price < data.retail_price
-		)
-			badge = "SALE";
-
-		const product: ProductDetail = {
-			id: data.id,
-			slug: data.slug,
-			model_name: data.model_name,
-			brand: data.brands?.name ?? "Unknown",
-			brand_id: data.brand_id,
-			description: data.description,
-			condition: data.condition as ProductDetail["condition"],
-			retail_price: data.retail_price,
-			resale_price: data.resale_price,
-			release_date: data.release_date,
+		const finalProduct: ProductDetail = {
+			id: p.id,
+			slug: p.slug,
+			model_name: p.model_name,
+			brand: p.brands?.name ?? "",
+			brand_id: p.brand_id,
+			description: p.description,
+			condition: p.condition as any,
+			retail_price: p.retail_price,
+			resale_price: p.resale_price,
+			release_date: p.release_date,
 			images,
 			variants,
 			colors: uniqueColors,
-			sizes: uniqueSizes,
+			sizes: uniqueSizes, // ← Now contains name + gender
 			min_price: minPrice,
-			badge,
+			badge: getBadge(p),
 		};
 
-		return NextResponse.json(product);
-	} catch (err) {
+		return NextResponse.json(finalProduct);
+	} catch (err: any) {
+		console.error("Product detail error:", err);
 		return NextResponse.json(
-			{ error: err instanceof Error ? err.message : "Unknown error" },
+			{ error: err.message || "Internal server error" },
 			{ status: 500 },
 		);
 	}
+}
+
+// Helper function
+function getBadge(product: any): ProductDetail["badge"] {
+	if (product.condition === "deadstock") return "LIMITED";
+	if (product.condition === "new") return "NEW";
+	if (
+		product.resale_price &&
+		product.retail_price &&
+		product.resale_price < product.retail_price
+	) {
+		return "SALE";
+	}
+	return null;
 }

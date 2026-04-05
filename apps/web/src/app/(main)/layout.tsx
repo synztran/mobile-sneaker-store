@@ -10,7 +10,7 @@ export default function MainLayout({
 	return (
 		<>
 			<TopNav />
-			<main className="pt-16 pb-32 min-h-screen">{children}</main>
+			<main className="mt-16 mb-32 min-h-screen">{children}</main>
 			<BottomNav />
 			<CartDrawer />
 		</>

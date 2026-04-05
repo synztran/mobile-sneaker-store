@@ -1,20 +1,31 @@
 "use client";
 
 import clsx from "clsx";
+import { House, ShoppingBasket, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navItems = [
-	{ href: "/", icon: "home_app_logo", label: "HOME", iconFilled: true },
-	{ href: "/shop", icon: "storefront", label: "SHOP", iconFilled: false },
-	{ href: "/profile", icon: "person", label: "PROFILE", iconFilled: false },
+	{ href: "/", icon: <House />, label: "Trang chủ", iconFilled: true },
+	{
+		href: "/shop",
+		icon: <ShoppingBasket />,
+		label: "Cửa hàng",
+		iconFilled: false,
+	},
+	{
+		href: "/profile",
+		icon: <UserRound />,
+		label: "Hồ sơ",
+		iconFilled: false,
+	},
 ];
 
 export function BottomNav() {
 	const pathname = usePathname();
 
 	return (
-		<nav className="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 glass-nav rounded-t-3xl z-50 shadow-float">
+		<nav className="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 glass-nav !bg-[#fbf9f5ee] rounded-t-3xl z-50">
 			{navItems.map((item) => {
 				const isActive = pathname === item.href;
 				return (
@@ -24,16 +35,20 @@ export function BottomNav() {
 						className={clsx(
 							"flex flex-col items-center justify-center rounded-2xl px-5 py-2 transition-all active:scale-90 duration-200",
 							isActive
-								? "text-primary bg-primary-fixed/30"
+								? "text-primary bg-primary-fixed/60"
 								: "text-on-surface opacity-50 hover:text-primary hover:opacity-100",
 						)}>
-						<span
-							className={clsx(
-								"material-symbols-outlined mb-1",
-								isActive && item.iconFilled && "icon-filled",
-							)}>
-							{item.icon}
-						</span>
+						{
+							<div
+								className={clsx(
+									isActive &&
+										item.iconFilled &&
+										"icon-filled",
+									"mb-1",
+								)}>
+								{item.icon}
+							</div>
+						}
 						<span className="font-sans text-[10px] font-semibold uppercase tracking-widest">
 							{item.label}
 						</span>
