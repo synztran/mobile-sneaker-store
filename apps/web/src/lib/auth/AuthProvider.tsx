@@ -46,9 +46,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	// Fetch profile from your API route
 	const fetchProfile = useCallback(async (): Promise<void> => {
 		try {
+			console.log("Fetching profile...");
 			const res = await fetch("/api/user/profile", {
 				credentials: "include", // important if using cookies
+				cache: "no-store", // ensure we get the latest data
 			});
+
+			console.log("res auth", res);
 
 			if (res.ok) {
 				const data = await res.json();
@@ -63,6 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	}, []);
 
 	const refreshProfile = useCallback(() => fetchProfile(), [fetchProfile]);
+  console.log("supabase", supabase)
 
 	// Initial session + auth listener
 	useEffect(() => {
@@ -70,11 +75,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 		// 1. Get initial session
 		const initializeAuth = async () => {
+			console.log("init auth");
 			try {
 				const {
 					data: { session },
 					error,
 				} = await supabase.auth.getSession();
+
+				console.log("getSession result:", { session, error });
 
 				if (error) {
 					console.error("getSession error:", error);

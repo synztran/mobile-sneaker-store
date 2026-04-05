@@ -195,6 +195,7 @@ export default function ShopPage() {
 		setLoading(true);
 		setError(null);
 		try {
+			console.log("init fetch product");
 			const params = new URLSearchParams();
 			if (debouncedSearch) params.set("search", debouncedSearch);
 			if (sort !== "newest") params.set("sort", sort);
@@ -207,7 +208,12 @@ export default function ShopPage() {
 			if (activeFilters.priceMax < 500)
 				params.set("priceMax", String(activeFilters.priceMax));
 
-			const res = await fetch(`/api/products?${params.toString()}`);
+			console.log("params", params.toString());
+
+			const res = await fetch(`/api/products?${params.toString()}`, {
+				cache: "no-store",
+			});
+			console.log("Res", res);
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
 			const data = await res.json();
 			setProducts(data.products ?? []);

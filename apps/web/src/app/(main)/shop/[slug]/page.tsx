@@ -116,7 +116,9 @@ export default function ProductPage({
 	useEffect(() => {
 		async function fetchProduct() {
 			try {
-				const res = await fetch(`/api/products/${params.slug}`);
+				const res = await fetch(`/api/products/${params.slug}`, {
+					cache: "no-store",
+				});
 				if (res.status === 404) {
 					setNotFoundState(true);
 					return;
