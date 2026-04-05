@@ -10,7 +10,9 @@ export default function MainLayout({
 	return (
 		<>
 			<TopNav />
-			<main className="mt-16 mb-32 min-h-screen">{children}</main>
+			<main className="main-top-offset main-bottom-offset min-h-screen">
+				{children}
+			</main>
 			<BottomNav />
 			<CartDrawer />
 		</>

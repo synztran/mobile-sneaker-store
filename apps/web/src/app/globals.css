@@ -43,4 +43,27 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
   }
+
+  /* ── iOS Safe Area (notch / Dynamic Island / home indicator) ── */
+  .top-nav-pad {
+    /* existing 1rem padding + safe area on top */
+    padding-top: calc(env(safe-area-inset-top, 0px) + 1rem);
+    padding-bottom: 1rem;
+  }
+
+  .bottom-nav-pad {
+    padding-top: 0.75rem;
+    /* existing 0.75rem padding + home-indicator clearance on bottom */
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+  }
+
+  .main-top-offset {
+    /* matches top-nav-pad height: safe-area + 1rem pad + ~1.75rem content + 1rem pad */
+    margin-top: calc(env(safe-area-inset-top, 0px) + 3.75rem);
+  }
+
+  .main-bottom-offset {
+    /* matches bottom-nav-pad height: 0.75rem + ~2.5rem content + safe-area + 0.75rem + extra */
+    margin-bottom: calc(env(safe-area-inset-bottom, 0px) + 5.5rem);
+  }
 }

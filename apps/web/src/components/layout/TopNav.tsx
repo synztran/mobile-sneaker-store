@@ -33,7 +33,7 @@ export function TopNav({
 	return (
 		<nav
 			className={clsx(
-				"fixed top-0 w-full z-[51] bg-gray-50 flex justify-between items-center px-6 py-4",
+				"fixed top-0 w-full z-[51] bg-gray-50 flex justify-between items-center px-6 top-nav-pad",
 				className,
 			)}>
 			<div className="flex items-center gap-4 w-10">

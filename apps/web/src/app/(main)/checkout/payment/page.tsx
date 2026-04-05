@@ -40,7 +40,7 @@ export default function PaymentPage() {
 	};
 
 	const buildQRBank = (message: string, paymentPrice: number) => {
-		return `https://qr.sepay.vn/img?acc=${process.env.NEXT_PUBLIC_BANK_ACCOUNT_NUMBER}&bank=${process.env.NEXT_PUBLIC_BANK_NAME}&amount=${paymentPrice}&des=${message}&template=compact`;
+		return `https://qr.sepay.vn/img?acc=${process.env.BANK_ACCOUNT_NUMBER}&bank=${process.env.BANK_NAME}&amount=${paymentPrice}&des=${message}&template=compact`;
 	};
 
 	return (

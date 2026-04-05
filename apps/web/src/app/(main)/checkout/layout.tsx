@@ -39,7 +39,7 @@ export default function CheckoutLayout({
 		<div className="min-h-screen bg-background">
 			{/* TopAppBar */}
 			<nav className="fixed top-0 w-full z-50">
-				<div className="glass-nav flex items-center justify-between px-6 py-4">
+				<div className="glass-nav flex items-center justify-between px-6 top-nav-pad">
 					<Link
 						href="/"
 						className="hover:opacity-70 transition-opacity active:scale-95 duration-200">
