@@ -51,7 +51,8 @@ export async function GET() {
 					allTablesOk
 						? "healthy"
 						: "degraded",
-				supabaseUrl: process.env.SUPABASE_URL ?? "(not set)",
+				supabaseUrl:
+					process.env.NEXT_PUBLIC_SUPABASE_URL ?? "(not set)",
 				...results,
 			},
 			{ status: 200 },
