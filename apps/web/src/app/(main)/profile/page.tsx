@@ -1,11 +1,11 @@
 "use client";
 
+import Icon from "@/components/ui/Icon";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { toast } from "@/lib/toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import Icon from "@/components/ui/Icon";
 
 const NAV_ITEMS = [
 	{ icon: "shopping_bag", label: "My Orders" },
@@ -20,7 +20,7 @@ export default function ProfilePage() {
 	const router = useRouter();
 	const { user, profile, loading, signOut, refreshProfile } = useAuth();
 
-  console.log(user, profile)
+	console.log(user, profile);
 
 	const [editing, setEditing] = useState(false);
 	const [saving, setSaving] = useState(false);
@@ -132,22 +132,30 @@ export default function ProfilePage() {
 									{saving ? (
 										<span className="loading loading-spinner loading-xs text-white" />
 									) : (
-										<Icon name="check" className="text-white text-lg" />
+										<Icon
+											name="check"
+											className="text-white text-lg"
+										/>
 									)}
 								</button>
 								<button
 									onClick={() => setEditing(false)}
 									className="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center active:scale-90 transition-transform">
-									<Icon name="close" className="text-on-surface text-lg" />
+									<Icon
+										name="close"
+										className="text-on-surface text-lg"
+									/>
 								</button>
 							</>
 						) : (
 							<button
 								onClick={handleEditToggle}
 								className="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center active:scale-90 transition-transform">
-								<Icon name="edit" className="text-on-surface text-lg" />
+								<Icon
+									name="edit"
+									className="text-on-surface text-lg"
+								/>
 							</button>
-						)}
 						)}
 					</div>
 				)}
@@ -163,7 +171,10 @@ export default function ProfilePage() {
 						<span className="font-semibold text-on-surface">
 							{label}
 						</span>
-						<Icon name="chevron_right" className="text-outline-variant ml-auto" />
+						<Icon
+							name="chevron_right"
+							className="text-outline-variant ml-auto"
+						/>
 					</button>
 				))}
 			</div>
