@@ -1,8 +1,8 @@
 "use client";
 
 import type { Profile } from "@/lib/supabase/database.types";
-import { createBrowserClient } from "@supabase/ssr";
 import type { Session, User } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 import {
 	createContext,
 	useCallback,
@@ -11,9 +11,20 @@ import {
 	useState,
 } from "react";
 
-const supabase = createBrowserClient(
+// Use @supabase/supabase-js directly so the session is stored in localStorage
+// instead of cookies — cookies don't persist in iOS PWA standalone mode.
+const supabase = createClient(
 	process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co",
 	process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "placeholder-anon-key",
+	{
+		auth: {
+			persistSession: true,
+			autoRefreshToken: true,
+			detectSessionInUrl: true,
+			storage:
+				typeof window !== "undefined" ? window.localStorage : undefined,
+		},
+	},
 );
 
 interface AuthContextValue {

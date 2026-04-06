@@ -61,7 +61,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 	);
 }
 
-export function ShopPageSkeleton() {
+function ShopPageSkeleton() {
 	return (
 		<div className="px-4 py-4">
 			<div className="flex items-center gap-3 bg-surface-container rounded-full px-3 py-3.5 mb-6 h-12 animate-pulse" />
