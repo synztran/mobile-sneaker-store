@@ -3,8 +3,15 @@
  * Mirrors the shaping logic in /api/products/route.ts.
  */
 
+import type {
+	ProductDetail,
+	ProductVariantDetail,
+} from "@/app/api/products/[slug]/route";
 import type { ShopProduct } from "@/app/api/products/route";
+import type { Fee } from "@/lib/supabase/database.types";
 import { getPublicClient } from "@/lib/supabase/public";
+
+export type { ProductDetail };
 
 // ─── Color name → hex ─────────────────────────────────────────────────────────
 
@@ -257,5 +264,175 @@ export async function getNewestProducts(limit: number): Promise<ShopProduct[]> {
 	} catch (err) {
 		console.error("[getNewestProducts] Unexpected error:", err);
 		return [];
+	}
+}
+
+function getBadge(product: {
+	condition: string | null;
+	retail_price: number | null;
+	resale_price: number | null;
+}): ProductDetail["badge"] {
+	if (product.condition === "deadstock") return "LIMITED";
+	if (product.condition === "new") return "NEW";
+	if (
+		product.retail_price &&
+		product.resale_price &&
+		product.resale_price < product.retail_price
+	)
+		return "SALE";
+	return null;
+}
+
+/**
+ * Fetch a single product's full detail by slug — for the product detail server component.
+ */
+export async function getProductBySlug(
+	slug: string,
+): Promise<ProductDetail | null> {
+	try {
+		const supabase = getPublicClient();
+
+		const { data: product, error } = await supabase
+			.from("products")
+			.select(
+				`id, slug, model_name, description, retail_price, resale_price, condition, release_date, brand_id,
+				 brands(id, name),
+				 product_images(image_url, alt_text, is_primary, sort_order),
+				 product_variants(id, color_id, size_id, price, stock_quantity, sku,
+				   colors(id, name, color_value),
+				   sizes(id, name, us_size, gender)
+				 )`,
+			)
+			.eq("slug", slug)
+			.limit(1)
+			.maybeSingle();
+
+		if (error || !product) return null;
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const p = product as any;
+
+		const images = (p.product_images ?? [])
+			.sort(
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				(a: any, b: any) =>
+					(b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0) ||
+					(a.sort_order ?? 0) - (b.sort_order ?? 0),
+			)
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			.map((i: any) => ({
+				url: i.image_url,
+				alt: i.alt_text,
+				is_primary: i.is_primary,
+			}));
+
+		const variants: ProductVariantDetail[] = [];
+		const sizeMap = new Map<string, Record<string, unknown>>();
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		(p.product_variants ?? []).forEach((variant: any) => {
+			const sizeRow = variant.sizes;
+			const colorRow = variant.colors;
+			const sizeLabel = sizeRow?.name ?? "Unknown Size";
+			const numericSize = sizeRow?.us_size ?? null;
+			const gender = sizeRow?.gender ?? null;
+
+			variants.push({
+				id: variant.id,
+				color_id: variant.color_id,
+				color: colorRow,
+				size_id: variant.size_id,
+				size: { label: sizeLabel, gender, id: variant.size_id },
+				price: variant.price,
+				stock_quantity: variant.stock_quantity,
+				sku: variant.sku,
+			});
+
+			if (sizeRow?.name) {
+				const key = `${sizeRow.name}-${sizeRow.gender ?? "unisex"}`;
+				if (!sizeMap.has(key)) {
+					sizeMap.set(key, {
+						id: sizeRow.id,
+						name: sizeLabel,
+						us_size: numericSize ?? 0,
+						gender: sizeRow.gender,
+						available: variant.stock_quantity > 0,
+					});
+				} else if (variant.stock_quantity > 0) {
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+					sizeMap.get(key)!.available = true;
+				}
+			}
+		});
+
+		const uniqueSizes = Array.from(sizeMap.values()).sort((a, b) => {
+			if (a.us_size !== b.us_size)
+				return (a.us_size as number) - (b.us_size as number);
+			return ((a.gender ?? "") as string).localeCompare(
+				(b.gender ?? "") as string,
+			);
+		});
+
+		const uniqueColors = Array.from(
+			new Map(
+				variants.map((v) => [
+					v.color_id,
+					{
+						name: v.color?.name,
+						color_value: v.color?.color_value,
+						id: v.color_id,
+					},
+				]),
+			).values(),
+		);
+
+		const minPrice =
+			variants.length > 0
+				? Math.min(...variants.map((v) => v.price))
+				: (p.resale_price ?? p.retail_price ?? 0);
+
+		return {
+			id: p.id,
+			slug: p.slug,
+			model_name: p.model_name,
+			brand: p.brands?.name ?? "",
+			brand_id: p.brand_id,
+			description: p.description,
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			condition: p.condition as any,
+			retail_price: p.retail_price,
+			resale_price: p.resale_price,
+			release_date: p.release_date,
+			images,
+			variants,
+			colors: uniqueColors,
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			sizes: uniqueSizes as any,
+			min_price: minPrice,
+			badge: getBadge(p),
+		};
+	} catch (err) {
+		console.error("[getProductBySlug] Unexpected error:", err);
+		return null;
+	}
+}
+
+/**
+ * Fetch delivery fees for the checkout shipping page.
+ */
+export async function getFees(): Promise<Fee | null> {
+	try {
+		const { data, error } = await getPublicClient()
+			.from("fees")
+			.select(
+				"delivery_immediate_price, delivery_basic_price, insurance_fee, packing_fee, handling_fee, updated_at",
+			)
+			.limit(1)
+			.maybeSingle();
+
+		if (error) return null;
+		return data as Fee | null;
+	} catch {
+		return null;
 	}
 }

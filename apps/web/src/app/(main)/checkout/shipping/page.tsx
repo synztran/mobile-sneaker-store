@@ -5,6 +5,7 @@ import { VIETNAM_CITIES } from "@/constants/vietnam-cities";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { formatVND } from "@/lib/currency";
 import { Fee } from "@/lib/supabase/database.types";
+import { getPublicClient } from "@/lib/supabase/public";
 import { toast } from "@/lib/toast";
 import { useCartStore, useCheckoutStore } from "@/store";
 import clsx from "clsx";
@@ -116,10 +117,16 @@ export default function ShippingPage() {
 	}, []);
 
 	useEffect(() => {
-		fetch("/api/fees")
-			.then((r) => r.json())
-			.then((data: Fee) => setFees(data))
-			.catch(() => null);
+		getPublicClient()
+			.from("fees")
+			.select(
+				"delivery_immediate_price, delivery_basic_price, insurance_fee, packing_fee, handling_fee, updated_at",
+			)
+			.limit(1)
+			.maybeSingle()
+			.then(({ data }) => {
+				if (data) setFees(data as Fee);
+			});
 	}, []);
 
 	useEffect(() => {

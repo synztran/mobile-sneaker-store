@@ -9,7 +9,7 @@ function NewArrivalCard({ product }: { product: ShopProduct }) {
 		<Link
 			href={`/shop/${product.slug}`}
 			className="flex-shrink-0 w-[260px] group">
-			<div className="h-[340px] rounded-3xl overflow-hidden relative mb-4">
+			<div className="h-[340px] rounded-3xl overflow-hidden relative mb-4 bg-[#fbf9f5]">
 				{product.images[0] ? (
 					<Image
 						src={product.images[0]}

@@ -1,5 +1,6 @@
 "use client";
 
+import { updateProfileName } from "@/app/actions/profile";
 import Icon from "@/components/ui/Icon";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { toast } from "@/lib/toast";
@@ -38,21 +39,15 @@ export default function ProfilePage() {
 	const handleSave = async () => {
 		if (!fullName.trim()) return;
 		setSaving(true);
-		try {
-			const res = await fetch("/api/user/profile", {
-				method: "PATCH",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ full_name: fullName.trim() }),
-			});
-			if (!res.ok) throw new Error("Failed to save");
-			await refreshProfile();
-			toast.success("Profile updated");
-			setEditing(false);
-		} catch {
+		const { error } = await updateProfileName(fullName);
+		setSaving(false);
+		if (error) {
 			toast.error("Could not save profile");
-		} finally {
-			setSaving(false);
+			return;
 		}
+		await refreshProfile();
+		toast.success("Profile updated");
+		setEditing(false);
 	};
 
 	const handleEditToggle = () => {

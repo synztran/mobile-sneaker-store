@@ -43,22 +43,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [profile, setProfile] = useState<Profile | null>(null);
 	const [loading, setLoading] = useState(true);
 
-	// Fetch profile from your API route
+	// Fetch profile directly from Supabase (no API round-trip)
 	const fetchProfile = useCallback(async (): Promise<void> => {
 		try {
-			console.log("Fetching profile...");
-			const res = await fetch("/api/user/profile", {
-				credentials: "include", // important if using cookies
-				cache: "no-store", // ensure we get the latest data
-			});
-
-			console.log("res auth", res);
-
-			if (res.ok) {
-				const data = await res.json();
-				setProfile(data);
-			} else {
+			const {
+				data: { user },
+			} = await supabase.auth.getUser();
+			if (!user) {
 				setProfile(null);
+				return;
+			}
+
+			const { data, error } = await supabase
+				.from("profiles")
+				.select("*")
+				.eq("id", user.id)
+				.maybeSingle();
+
+			if (error) {
+				console.error("Failed to fetch profile:", error.message);
+				setProfile(null);
+				return;
+			}
+
+			// Self-heal: insert profile row if missing
+			if (!data) {
+				const { data: created } = await supabase
+					.from("profiles")
+					.insert({
+						id: user.id,
+						full_name:
+							(user.user_metadata?.full_name as
+								| string
+								| undefined) ?? null,
+						avatar_url:
+							(user.user_metadata?.avatar_url as
+								| string
+								| undefined) ?? null,
+					})
+					.select()
+					.single();
+				setProfile(created ?? null);
+			} else {
+				setProfile(data);
 			}
 		} catch (err) {
 			console.error("Failed to fetch profile:", err);
@@ -67,7 +94,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	}, []);
 
 	const refreshProfile = useCallback(() => fetchProfile(), [fetchProfile]);
-  console.log("supabase", supabase)
 
 	// Initial session + auth listener
 	useEffect(() => {
@@ -75,28 +101,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 		// 1. Get initial session
 		const initializeAuth = async () => {
-			console.log("init auth");
 			try {
 				const {
 					data: { session },
 					error,
 				} = await supabase.auth.getSession();
 
-				console.log("getSession result:", { session, error });
-
-				if (error) {
-					console.error("getSession error:", error);
-				}
+				if (error) console.error("getSession error:", error);
 
 				if (mounted) {
 					setSession(session);
 					setUser(session?.user ?? null);
-
-					if (session?.user) {
-						await fetchProfile();
-					} else {
-						setProfile(null);
-					}
+					if (session?.user) await fetchProfile();
+					else setProfile(null);
 				}
 			} catch (err) {
 				console.error("Auth initialization error:", err);
