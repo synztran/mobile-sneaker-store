@@ -127,6 +127,107 @@ function shapeRow(p: RawListRow): ShopProduct {
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
+export interface GetProductsParams {
+	search?: string;
+	brand?: string;
+	color?: string;
+	sizes?: number[];
+	priceMin?: number;
+	priceMax?: number;
+	sort?: "newest" | "price_asc" | "price_desc";
+	limit?: number;
+}
+
+/**
+ * Flexible product query for server components (shop page, search, etc.)
+ */
+export async function getProducts(
+	params: GetProductsParams = {},
+): Promise<{ products: ShopProduct[]; total: number }> {
+	const {
+		search = "",
+		brand = "",
+		color = "",
+		sizes = [],
+		priceMin = 0,
+		priceMax = 500,
+		sort = "newest",
+		limit,
+	} = params;
+
+	try {
+		const supabase = getPublicClient();
+
+		// Resolve brand → id
+		let brandId: number | null = null;
+		if (brand) {
+			const { data: brandRow } = await supabase
+				.from("brands")
+				.select("id")
+				.ilike("name", `%${brand}%`)
+				.limit(1)
+				.maybeSingle();
+			if (!brandRow) return { products: [], total: 0 };
+			brandId = (brandRow as { id: number }).id;
+		}
+
+		let query = supabase.from("products").select(
+			`id, slug, model_name, description, retail_price, resale_price, condition, created_at,
+			 brands(id, name),
+			 product_images(image_url, is_primary, sort_order),
+			 product_variants(color, color_id, size_id, price, stock_quantity, colors(name, color_value), sizes(id, name, us_size, gender))`,
+		);
+
+		if (search) query = query.ilike("model_name", `%${search}%`);
+		if (brandId !== null) query = query.eq("brand_id", brandId);
+		query = query.order("created_at", { ascending: false });
+
+		const { data, error } = await query;
+		if (error) {
+			console.error(
+				"[getProducts] Supabase error:",
+				error.message,
+				error.code,
+			);
+			return { products: [], total: 0 };
+		}
+
+		let products = ((data ?? []) as unknown as RawListRow[]).map(shapeRow);
+
+		// JS-level filters
+		if (sizes.length > 0) {
+			products = products.filter((p) =>
+				sizes.some((fs) =>
+					p.sizes.some((s) => s.id === fs && s.available),
+				),
+			);
+		}
+		if (color) {
+			products = products.filter((p) =>
+				p.colors.some(
+					(c) => c.name.toLowerCase() === color.toLowerCase(),
+				),
+			);
+		}
+		if (priceMin > 0 || priceMax < 500) {
+			products = products.filter(
+				(p) => p.min_price >= priceMin && p.min_price <= priceMax,
+			);
+		}
+
+		if (sort === "price_asc")
+			products.sort((a, b) => a.min_price - b.min_price);
+		else if (sort === "price_desc")
+			products.sort((a, b) => b.min_price - a.min_price);
+
+		const sliced = limit && limit > 0 ? products.slice(0, limit) : products;
+		return { products: sliced, total: sliced.length };
+	} catch (err) {
+		console.error("[getProducts] Unexpected error:", err);
+		return { products: [], total: 0 };
+	}
+}
+
 /**
  * Fetch the N newest products for use in server components.
  */

@@ -65,7 +65,7 @@ export function CartDrawer() {
 						<div className="text-center py-12">
 							<Icon
 								name="shopping_bag"
-								className="text-5xl text-outline-variant"
+								className="text-5xl text-outline-variant flex justify-center"
 							/>
 							<p className="mt-3 text-on-surface-variant font-semibold">
 								Giỏ hàng trống
