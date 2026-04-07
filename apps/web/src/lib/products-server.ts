@@ -39,11 +39,15 @@ const COLOR_HEX: Record<string, string> = {
 type BrandRow = { id: number; name: string } | null;
 type ImageRow = { image_url: string; is_primary: boolean; sort_order: number };
 type VariantRow = {
+	id: number;
 	color: string;
-	color_id: number;
-	size_id: number;
-	price: number;
+	sku: string | null;
 	stock_quantity: number;
+	price: number;
+	created_at: string;
+	color_id: number | null;
+	size_id: number | null;
+	size_backup: string | null;
 	colors: { name: string; color_value: string; id: number | null } | null;
 	sizes: {
 		id: number;
@@ -129,6 +133,18 @@ function shapeRow(p: RawListRow): ShopProduct {
 			),
 		})),
 		badge,
+		variants: variants.map((v) => ({
+			id: v.id,
+			product_id: p.id,
+			color: v.color,
+			sku: v.sku ?? "",
+			stock_quantity: v.stock_quantity,
+			price: v.price,
+			created_at: v.created_at,
+			color_id: v.color_id ?? null,
+			size_id: v.size_id ?? null,
+			size_backup: v.size_backup ?? "",
+		})),
 	};
 }
 
@@ -182,7 +198,7 @@ export async function getProducts(
 			`id, slug, model_name, description, retail_price, resale_price, condition, created_at,
 			 brands(id, name),
 			 product_images(image_url, is_primary, sort_order),
-			 product_variants(color, color_id, size_id, price, stock_quantity, colors(name, color_value), sizes(id, name, us_size, gender))`,
+			 product_variants(id, color, sku, stock_quantity, price, created_at, color_id, size_id, size_backup, colors(name, color_value), sizes(id, name, us_size, gender))`,
 		);
 
 		if (search) query = query.ilike("model_name", `%${search}%`);
@@ -246,7 +262,7 @@ export async function getNewestProducts(limit: number): Promise<ShopProduct[]> {
 				`id, slug, model_name, description, retail_price, resale_price, condition, created_at,
 				 brands(id, name),
 				 product_images(image_url, is_primary, sort_order),
-				 product_variants(color, color_id, size_id, price, stock_quantity, colors(name, color_value), sizes(id, name, us_size, gender))`,
+				 product_variants(id, color, sku, stock_quantity, price, created_at, color_id, size_id, size_backup, colors(name, color_value), sizes(id, name, us_size, gender))`,
 			)
 			.order("created_at", { ascending: false })
 			.limit(limit);

@@ -82,6 +82,7 @@ export default function PaymentPage() {
 
 	const handleCompleted = async () => {
 		setSubmitting(true);
+		console.log("items", items);
 		try {
 			const res = await fetch("/api/checkout/submit", {
 				method: "POST",
@@ -92,7 +93,7 @@ export default function PaymentPage() {
 					delivery_fee: deliveryFee,
 					shipping,
 					items: items.map((i) => ({
-						variant_id: i.size.id,
+						variant_id: i.variant_id,
 						quantity: i.quantity,
 						price: i.product.price,
 					})),
@@ -117,8 +118,6 @@ export default function PaymentPage() {
 			router.push(`/checkout/checking/${result.order_id}`);
 		} catch {
 			toast.error("Lỗi kết nối, vui lòng thử lại");
-		} finally {
-			setSubmitting(false);
 		}
 	};
 
@@ -181,8 +180,8 @@ export default function PaymentPage() {
 							</span>
 						</div>
 					</div>
-					<p className="text-on-surface-variant text-sm leading-relaxed text-center relative z-10 mt-2">
-						Mở ứng dụng ngân hàng và quét mã để hoàn tất thanh toán.
+					<p className="text-on-surface-variant text-xs leading-relaxed text-center relative z-10 mt-2">
+						Mở app banking và quét mã để hoàn tất thanh toán.
 					</p>
 				</div>
 			</section>

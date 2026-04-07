@@ -124,6 +124,7 @@ export function ProductView({ product }: { product: ProductDetail }) {
 				color_value: cartColor.color_value,
 				id: cartColor.id,
 			},
+			displayVariant?.id ?? null,
 		);
 		toast.success("Đã thêm vào giỏ!");
 		openCart();

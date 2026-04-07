@@ -1,3 +1,4 @@
+import { ProductVariant } from "@/lib/data";
 import { getPublicClient } from "@/lib/supabase/public";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -24,6 +25,7 @@ export interface ShopProduct {
 		available: boolean;
 		id: number | null;
 	}[];
+	variants: ProductVariant[];
 	badge: "NEW" | "SALE" | "LIMITED" | null;
 }
 
@@ -62,11 +64,15 @@ type ImageRow = {
 	sort_order: number;
 };
 type VariantRow = {
+	id: number;
 	color: string;
-	color_id: number;
-	size_id: number;
-	price: number;
+	sku: string | null;
 	stock_quantity: number;
+	price: number;
+	created_at: string;
+	color_id: number | null;
+	size_id: number | null;
+	size_backup: string | null;
 	colors: { name: string; color_value: string; id: number | null } | null;
 	sizes: {
 		id: number;
@@ -153,7 +159,7 @@ export async function GET(req: NextRequest) {
 			`id, slug, model_name, description, retail_price, resale_price, condition, created_at,
 			 brands(id, name),
 			 product_images(image_url, is_primary, sort_order),
-			 product_variants(color, color_id, size_id, price, stock_quantity, colors(name, color_value), sizes(id, name, us_size, gender))`,
+			 product_variants(id, color, sku, stock_quantity, price, created_at, color_id, size_id, size_backup, colors(name, color_value), sizes(id, name, us_size, gender))`,
 		);
 
 		if (search) query = query.ilike("model_name", `%${search}%`);
@@ -235,6 +241,18 @@ export async function GET(req: NextRequest) {
 						(v) =>
 							v.sizes?.id === sizeRow.id && v.stock_quantity > 0,
 					),
+				})),
+				variants: variants.map((v) => ({
+					id: v.id,
+					product_id: p.id,
+					color: v.color,
+					sku: v.sku ?? "",
+					stock_quantity: v.stock_quantity,
+					price: v.price,
+					created_at: v.created_at,
+					color_id: v.color_id ?? null,
+					size_id: v.size_id ?? null,
+					size_backup: v.size_backup ?? "",
 				})),
 				badge,
 			};

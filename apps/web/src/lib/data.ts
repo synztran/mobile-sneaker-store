@@ -17,6 +17,20 @@ export interface Product {
 	weight?: string;
 	inStock: boolean;
 	isLimitedEdition?: boolean;
+	variants?: ProductVariant[];
+}
+
+export interface ProductVariant {
+	id: number;
+	product_id: number;
+	color: string;
+	sku: string;
+	stock_quantity: number;
+	price: number;
+	created_at: string;
+	color_id: number | null;
+	size_id: number | null;
+	size_backup: string;
 }
 
 export interface ColorOption {
@@ -41,6 +55,7 @@ export interface CartItem {
 	};
 	color: ColorOption;
 	quantity: number;
+	variant_id: number | null;
 }
 
 export interface ShippingDetails {

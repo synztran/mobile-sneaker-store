@@ -100,6 +100,7 @@ export function CartDrawer() {
 														item.product.id,
 														item.size.id,
 														item.color.id,
+														item.variant_id,
 														-1,
 													)
 												}
@@ -115,6 +116,7 @@ export function CartDrawer() {
 														item.product.id,
 														item.size.id,
 														item.color.id,
+														item.variant_id,
 														1,
 													)
 												}

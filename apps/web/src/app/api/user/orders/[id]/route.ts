@@ -77,25 +77,45 @@ export async function GET(
 			);
 		}
 
-		// Fetch order items joined with variant → product + images + sizes + colors
+		// Fetch order items, then look up each variant separately to avoid join ambiguity
 		const { data: rawItems } = await supabase
 			.from("order_items")
-			.select(
-				`
-				id, variant_id, quantity, price_at_purchase,
-				product_variants (
-					product_id,
-					products ( model_name, product_images ( image_url, is_primary, sort_order ) ),
-					sizes ( name ),
-					colors ( name )
-				)
-			`,
-			)
+			.select("id, variant_id, quantity, price_at_purchase")
 			.eq("order_id", orderId);
+
+		// Collect unique variant IDs
+		const variantIds = [
+			...new Set(
+				(rawItems ?? [])
+					.map((r) => r.variant_id)
+					.filter((v): v is number => v !== null),
+			),
+		];
+
+		// Fetch variants with product + images + sizes + colors
+		const { data: variants } = variantIds.length
+			? await supabase
+					.from("product_variants")
+					.select(
+						`id, product_id,
+						products ( model_name, product_images ( image_url, is_primary, sort_order ) ),
+						sizes ( name ),
+						colors ( name )`,
+					)
+					.in("id", variantIds)
+			: { data: [] };
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const variantMap = new Map<number, any>(
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			(variants ?? []).map((v: any) => [v.id, v]),
+		);
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const items: OrderItemDetail[] = (rawItems ?? []).map((row: any) => {
-			const variant = row.product_variants;
+			const variant = row.variant_id
+				? variantMap.get(row.variant_id)
+				: null;
 			const product = variant?.products;
 			const images: Array<{
 				image_url: string;
@@ -104,15 +124,17 @@ export async function GET(
 			}> = product?.product_images ?? [];
 			const primaryImage =
 				images.find((img) => img.is_primary)?.image_url ??
-				images.sort((a, b) => a.sort_order - b.sort_order)[0]
-					?.image_url ??
+				images.sort(
+					(a: { sort_order: number }, b: { sort_order: number }) =>
+						a.sort_order - b.sort_order,
+				)[0]?.image_url ??
 				null;
 
 			return {
 				id: row.id,
 				variant_id: row.variant_id,
 				quantity: row.quantity,
-				price_at_purchase: row.price_at_purchase,
+				price_at_purchase: Number(row.price_at_purchase),
 				product_name: product?.model_name ?? null,
 				product_image: primaryImage,
 				size_label: variant?.sizes?.name ?? null,

@@ -15,6 +15,7 @@ import {
 	MapPinHouse,
 	Motorbike,
 	Phone,
+	Truck,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -100,7 +101,7 @@ const DELIVERY_OPTIONS = [
 		id: "shipment" as const,
 		label: "Đơn vị vận chuyển",
 		sublabel: "Giao bởi đơn vị vận chuyển",
-		icon: "local_shipping",
+		icon: Truck,
 		price: null as number | null, // resolved dynamically from fees
 		isHidden: true,
 	},
@@ -519,7 +520,7 @@ export default function ShippingPage() {
 					</div>
 					<button
 						type="submit"
-						className="w-full primary-gradient text-white font-black uppercase tracking-widest py-5 flex items-center justify-center gap-2 text-sm active:opacity-90 transition-opacity">
+						className="w-full primary-gradient text-white font-black uppercase tracking-widest py-5 flex items-center justify-center gap-2 text-sm active:opacity-90 transition-opacity rounded-bl-3xl rounded-br-3xl">
 						Tiếp tục thanh toán
 						<Icon name="arrow_forward" className="text-lg" />
 					</button>

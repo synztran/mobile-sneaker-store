@@ -31,7 +31,6 @@ export default function CheckingPage() {
 				minute: "2-digit",
 			})
 		: "—";
-	console.log("orderedItems", orderedItems);
 	return (
 		<div className="space-y-6">
 			{/* Status card */}

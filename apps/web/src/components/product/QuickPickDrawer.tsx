@@ -75,13 +75,21 @@ export function QuickPickDrawer({
 			rating: 0,
 			reviews: 0,
 			inStock: product.sizes.some((s) => s.available),
+      variants: product.variants || [],
 		};
+
+		console.log("product", product);
 
 		const selectedSizeObj = product.sizes.find(
 			(s) => s.id === selectedSize,
 		);
 
 		if (!selectedSizeObj) return;
+
+		const matchedVariant = product.variants.find(
+			(v) =>
+				v.size_id === selectedSizeObj.id && v.color_id === cartColor.id,
+		);
 
 		addItem(
 			cartProduct,
@@ -91,6 +99,7 @@ export function QuickPickDrawer({
 				id: selectedSizeObj.id,
 			},
 			cartColor,
+			matchedVariant?.id ?? null,
 		);
 		onClose();
 		openCart();

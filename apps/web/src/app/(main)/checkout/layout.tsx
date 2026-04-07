@@ -100,7 +100,7 @@ export default function CheckoutLayout({
 				</div>
 			</nav>
 
-			<main className="mt-36 pb-18 px-4 w-full mx-auto">{children}</main>
+			<main className="mt-[12rem] pb-18 px-4 w-full mx-auto">{children}</main>
 		</div>
 	);
 }

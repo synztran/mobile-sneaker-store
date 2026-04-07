@@ -16,16 +16,19 @@ interface CartStore {
 		product: Product,
 		size: CartItem["size"],
 		color: ColorOption,
+		variantId: number | null,
 	) => void;
 	removeItem: (
 		productId: string,
 		sizeId: number | null,
 		colorId: number | null,
+    variantId: number | null,
 	) => void;
 	updateQty: (
 		productId: string,
 		sizeId: number | null,
 		colorId: number | null,
+    variantId: number | null,
 		delta: number,
 	) => void;
 	clearCart: () => void;
@@ -43,14 +46,15 @@ export const useCartStore = create<CartStore>()(
 			totalPrice: 0,
 			isOpen: false,
 
-			addItem: (product, size, color) => {
+			addItem: (product, size, color, variantId) => {
 				set((state) => {
 					const cartId = state.cartId ?? crypto.randomUUID();
 					const existing = state.items.find(
 						(i) =>
 							i.product.id === product.id &&
 							i.size.id === size.id &&
-							i.color.id === color.id,
+							i.color.id === color.id &&
+							i.variant_id === variantId,
 					);
 					if (existing) {
 						return {
@@ -58,7 +62,8 @@ export const useCartStore = create<CartStore>()(
 							items: state.items.map((i) =>
 								i.product.id === product.id &&
 								i.size.id === size.id &&
-								i.color.id === color.id
+								i.color.id === color.id &&
+								i.variant_id === variantId
 									? { ...i, quantity: i.quantity + 1 }
 									: i,
 							),
@@ -68,32 +73,34 @@ export const useCartStore = create<CartStore>()(
 						cartId,
 						items: [
 							...state.items,
-							{ product, size, color, quantity: 1 },
+							{ product, size, color, quantity: 1, variant_id: variantId },
 						],
 					};
 				});
 			},
 
-			removeItem: (productId, sizeId, colorId) => {
+			removeItem: (productId, sizeId, colorId, variantId) => {
 				set((state) => ({
 					items: state.items.filter(
 						(i) =>
 							!(
 								i.product.id === productId &&
 								i.size.id === sizeId &&
-								i.color.id === colorId
+								i.color.id === colorId &&
+								i.variant_id === variantId
 							),
 					),
 				}));
 			},
 
-			updateQty: (productId, sizeId, colorId, delta) => {
+			updateQty: (productId, sizeId, colorId, variantId, delta) => {
 				set((state) => ({
 					items: state.items
 						.map((i) =>
 							i.product.id === productId &&
 							i.size.id === sizeId &&
-							i.color.id === colorId
+							i.color.id === colorId &&
+							i.variant_id === variantId
 								? {
 										...i,
 										quantity: Math.max(
