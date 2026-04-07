@@ -9,6 +9,7 @@ import { persist } from "zustand/middleware";
 
 interface CartStore {
 	items: CartItem[];
+	cartId: string | null;
 	totalPrice: number;
 	isOpen: boolean;
 	addItem: (
@@ -38,11 +39,13 @@ export const useCartStore = create<CartStore>()(
 	persist(
 		(set, get) => ({
 			items: [],
+			cartId: null,
 			totalPrice: 0,
 			isOpen: false,
 
 			addItem: (product, size, color) => {
 				set((state) => {
+					const cartId = state.cartId ?? crypto.randomUUID();
 					const existing = state.items.find(
 						(i) =>
 							i.product.id === product.id &&
@@ -51,6 +54,7 @@ export const useCartStore = create<CartStore>()(
 					);
 					if (existing) {
 						return {
+							cartId,
 							items: state.items.map((i) =>
 								i.product.id === product.id &&
 								i.size.id === size.id &&
@@ -61,6 +65,7 @@ export const useCartStore = create<CartStore>()(
 						};
 					}
 					return {
+						cartId,
 						items: [
 							...state.items,
 							{ product, size, color, quantity: 1 },
@@ -102,7 +107,7 @@ export const useCartStore = create<CartStore>()(
 				}));
 			},
 
-			clearCart: () => set({ items: [], totalPrice: 0 }),
+			clearCart: () => set({ items: [], cartId: null, totalPrice: 0 }),
 			openCart: () => set({ isOpen: true }),
 			closeCart: () => set({ isOpen: false }),
 
@@ -122,7 +127,21 @@ export const useCartStore = create<CartStore>()(
 interface CheckoutStore {
 	shipping: ShippingDetails | null;
 	deliveryFee: number;
+	orderId: number | null;
+	orderCode: string | null;
+	submittedAt: string | null;
+	transactionId: string | null;
+	totalAmount: number;
+	orderedItems: CartItem[];
 	setShipping: (data: ShippingDetails, deliveryFee: number) => void;
+	setOrder: (
+		id: number,
+		code: string,
+		transactionId: string | null,
+		submittedAt: string,
+		totalAmount: number,
+		orderedItems: CartItem[],
+	) => void;
 	clearCheckout: () => void;
 }
 
@@ -131,9 +150,41 @@ export const useCheckoutStore = create<CheckoutStore>()(
 		(set) => ({
 			shipping: null,
 			deliveryFee: 0,
+			orderId: null,
+			orderCode: null,
+			submittedAt: null,
+			transactionId: null,
+			totalAmount: 0,
+			orderedItems: [],
 			setShipping: (data, deliveryFee) =>
 				set({ shipping: data, deliveryFee }),
-			clearCheckout: () => set({ shipping: null, deliveryFee: 0 }),
+			setOrder: (
+				id,
+				code,
+				transactionId,
+				submittedAt,
+				totalAmount,
+				orderedItems,
+			) =>
+				set({
+					orderId: id,
+					orderCode: code,
+					transactionId,
+					submittedAt,
+					totalAmount,
+					orderedItems,
+				}),
+			clearCheckout: () =>
+				set({
+					shipping: null,
+					deliveryFee: 0,
+					orderId: null,
+					orderCode: null,
+					submittedAt: null,
+					transactionId: null,
+					totalAmount: 0,
+					orderedItems: [],
+				}),
 		}),
 		{ name: "sneaker-lab-checkout" },
 	),

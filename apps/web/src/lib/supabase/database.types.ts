@@ -195,6 +195,8 @@ export interface Database {
 				Row: {
 					id: number;
 					user_id: string | null;
+					cart_id: string | null;
+					order_code: string | null;
 					status:
 						| "pending"
 						| "paid"
@@ -203,6 +205,8 @@ export interface Database {
 						| "cancelled";
 					total_amount: number;
 					shipping_address: Json | null;
+					transaction_id: string | null; // auto-generated: TXN-YYYYMMDDHHMMSS-XXXXX
+					submitted_at: string | null;
 					payment_intent_id: string | null;
 					created_at: string;
 					updated_at: string;
@@ -210,6 +214,8 @@ export interface Database {
 				Insert: {
 					id?: never;
 					user_id?: string | null;
+					cart_id?: string | null;
+					order_code?: string | null;
 					status?:
 						| "pending"
 						| "paid"
@@ -218,6 +224,8 @@ export interface Database {
 						| "cancelled";
 					total_amount: number;
 					shipping_address?: Json | null;
+					transaction_id?: string | null;
+					submitted_at?: string | null;
 					payment_intent_id?: string | null;
 					created_at?: string;
 					updated_at?: string;
@@ -225,6 +233,8 @@ export interface Database {
 				Update: {
 					id?: never;
 					user_id?: string | null;
+					cart_id?: string | null;
+					order_code?: string | null;
 					status?:
 						| "pending"
 						| "paid"
@@ -233,6 +243,8 @@ export interface Database {
 						| "cancelled";
 					total_amount?: number;
 					shipping_address?: Json | null;
+					transaction_id?: string | null;
+					submitted_at?: string | null;
 					payment_intent_id?: string | null;
 					created_at?: never;
 					updated_at?: string;

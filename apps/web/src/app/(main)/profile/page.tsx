@@ -9,12 +9,20 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 const NAV_ITEMS = [
-	{ icon: "shopping_bag", label: "My Orders" },
-	{ icon: "favorite", label: "Saved Items" },
-	{ icon: "location_on", label: "Addresses" },
-	{ icon: "payment", label: "Payment Methods" },
-	{ icon: "notifications", label: "Notifications" },
-	{ icon: "help", label: "Help & Support" },
+	{
+		icon: "shopping_bag",
+		label: "Đơn hàng của tôi",
+		href: "/profile/orders",
+	},
+	// { icon: "favorite", label: "Sản phẩm yêu thích" },
+	// { icon: "location_on", label: "Địa chỉ" },
+	// { icon: "payment", label: "Phương thức thanh toán" },
+	// { icon: "notifications", label: "Thông báo" },
+	{
+		icon: "help",
+		label: "Trợ giúp & Hỗ trợ",
+		href: "https://zalo.me/0000000000",
+	},
 ];
 
 export default function ProfilePage() {
@@ -77,7 +85,8 @@ export default function ProfilePage() {
 	return (
 		<div className="px-6 pt-4">
 			{/* Avatar & name */}
-			<div className="flex items-center gap-4 mb-8">
+			<div
+				className={`flex items-center gap-4 mb-8 ${!user ? "justify-center" : ""}`}>
 				{profile?.avatar_url ? (
 					// eslint-disable-next-line @next/next/no-img-element
 					<img
@@ -111,10 +120,10 @@ export default function ProfilePage() {
 						</h2>
 					)}
 					<p className="text-on-surface-variant text-sm mt-0.5">
-						{user ? user.email : "Sneaker Lab Member"}
+						{user ? user.email : "Thành viên Giraffe Lab"}
 					</p>
 				</div>
-				{user && (
+				{/* {user && (
 					<div className="flex gap-2 flex-shrink-0">
 						{editing ? (
 							<>
@@ -151,14 +160,15 @@ export default function ProfilePage() {
 							</button>
 						)}
 					</div>
-				)}
+				)} */}
 			</div>
 
 			{/* Menu items */}
-			<div className="space-y-3">
-				{NAV_ITEMS.map(({ icon, label }) => (
-					<button
+			<div className={`space-y-3 ${!user ? "sr-only" : ""}`}>
+				{NAV_ITEMS.map(({ icon, label, href }) => (
+					<Link
 						key={label}
+						href={href}
 						className="w-full flex items-center gap-4 bg-surface-container-lowest rounded-2xl px-5 py-4 shadow-ambient-sm hover:bg-surface-container-low transition-colors">
 						<Icon name={icon} className="text-primary" />
 						<span className="font-semibold text-on-surface">
@@ -168,7 +178,7 @@ export default function ProfilePage() {
 							name="chevron_right"
 							className="text-outline-variant ml-auto"
 						/>
-					</button>
+					</Link>
 				))}
 			</div>
 
@@ -179,19 +189,19 @@ export default function ProfilePage() {
 						onClick={handleSignOut}
 						className="btn w-full bg-surface-container text-error border-0 rounded-2xl normal-case font-bold h-auto py-4">
 						<Icon name="logout" className="mr-2" />
-						Sign Out
+						Đăng xuất
 					</button>
 				) : (
 					<>
 						<Link
 							href="/login"
 							className="btn w-full primary-gradient text-white border-0 rounded-2xl normal-case font-bold h-auto py-4">
-							Sign In
+							Đăng nhập
 						</Link>
 						<Link
 							href="/register"
 							className="btn w-full bg-surface-container text-on-surface border-0 rounded-2xl normal-case font-bold h-auto py-4">
-							Create Account
+							Tạo tài khoản
 						</Link>
 					</>
 				)}

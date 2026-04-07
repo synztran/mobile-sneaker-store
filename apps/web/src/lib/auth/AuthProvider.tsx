@@ -1,8 +1,8 @@
 "use client";
 
 import type { Profile } from "@/lib/supabase/database.types";
+import { createBrowserClient } from "@supabase/ssr";
 import type { Session, User } from "@supabase/supabase-js";
-import { createClient } from "@supabase/supabase-js";
 import {
 	createContext,
 	useCallback,
@@ -11,20 +11,9 @@ import {
 	useState,
 } from "react";
 
-// Use @supabase/supabase-js directly so the session is stored in localStorage
-// instead of cookies — cookies don't persist in iOS PWA standalone mode.
-const supabase = createClient(
+const supabase = createBrowserClient(
 	process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://placeholder.supabase.co",
 	process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "placeholder-anon-key",
-	{
-		auth: {
-			persistSession: true,
-			autoRefreshToken: true,
-			detectSessionInUrl: true,
-			storage:
-				typeof window !== "undefined" ? window.localStorage : undefined,
-		},
-	},
 );
 
 interface AuthContextValue {
@@ -54,49 +43,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [profile, setProfile] = useState<Profile | null>(null);
 	const [loading, setLoading] = useState(true);
 
-	// Fetch profile directly from Supabase (no API round-trip)
+	// Fetch profile from your API route
 	const fetchProfile = useCallback(async (): Promise<void> => {
 		try {
-			const {
-				data: { user },
-			} = await supabase.auth.getUser();
-			if (!user) {
-				setProfile(null);
-				return;
-			}
+			const res = await fetch("/api/user/profile", {
+				credentials: "include", // important if using cookies
+			});
 
-			const { data, error } = await supabase
-				.from("profiles")
-				.select("*")
-				.eq("id", user.id)
-				.maybeSingle();
-
-			if (error) {
-				console.error("Failed to fetch profile:", error.message);
-				setProfile(null);
-				return;
-			}
-
-			// Self-heal: insert profile row if missing
-			if (!data) {
-				const { data: created } = await supabase
-					.from("profiles")
-					.insert({
-						id: user.id,
-						full_name:
-							(user.user_metadata?.full_name as
-								| string
-								| undefined) ?? null,
-						avatar_url:
-							(user.user_metadata?.avatar_url as
-								| string
-								| undefined) ?? null,
-					})
-					.select()
-					.single();
-				setProfile(created ?? null);
-			} else {
+			if (res.ok) {
+				const data = await res.json();
 				setProfile(data);
+			} else {
+				setProfile(null);
 			}
 		} catch (err) {
 			console.error("Failed to fetch profile:", err);
@@ -118,13 +76,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 					error,
 				} = await supabase.auth.getSession();
 
-				if (error) console.error("getSession error:", error);
+				if (error) {
+					console.error("getSession error:", error);
+				}
 
 				if (mounted) {
 					setSession(session);
 					setUser(session?.user ?? null);
-					if (session?.user) await fetchProfile();
-					else setProfile(null);
+
+					if (session?.user) {
+						await fetchProfile();
+					} else {
+						setProfile(null);
+					}
 				}
 			} catch (err) {
 				console.error("Auth initialization error:", err);

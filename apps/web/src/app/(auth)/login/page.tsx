@@ -23,9 +23,9 @@ export default function LoginPage() {
 		}
 		setLoading(true);
 		const { error } = await signIn(email, password);
-		setLoading(false);
 		if (error) {
 			toast.error(error);
+  		setLoading(false);
 			return;
 		}
 		toast.success("Chào mừng trở lại!");
@@ -33,8 +33,13 @@ export default function LoginPage() {
 	};
 
 	const handleGoogleSignIn = async () => {
+		setLoading(true);
 		const { error } = await signInWithGoogle();
-		if (error) toast.error(error);
+		if (error) {
+      toast.error(error);
+      setLoading(false);
+      return;
+    }
 	};
 
 	return (
@@ -48,7 +53,7 @@ export default function LoginPage() {
 					/>
 				</div>
 				<h1 className="text-2xl font-black tracking-tighter text-on-surface font-sans">
-					SNEAKER LAB
+					GIRAFFE LAB
 				</h1>
 			</div>
 
@@ -60,7 +65,7 @@ export default function LoginPage() {
 			{/* Form */}
 			<form onSubmit={handleSignIn} className="space-y-4 w-full">
 				{/* Email */}
-				<div className="flex items-center gap-3 bg-gray-200 rounded-2xl px-5 py-4 shadow-ambient-sm">
+				<div className="flex items-center gap-3 bg-surface-container-lowest border border-outline-variant rounded-2xl px-5 py-4">
 					<Icon name="mail" className="text-outline text-xl" />
 					<input
 						type="email"
@@ -69,11 +74,12 @@ export default function LoginPage() {
 						onChange={(e) => setEmail(e.target.value)}
 						className="flex-1 bg-transparent text-on-surface placeholder:text-outline font-medium outline-none"
 						autoComplete="email"
+            disabled={loading}
 					/>
 				</div>
 
 				{/* Password */}
-				<div className="flex items-center gap-3 bg-gray-200 rounded-2xl px-5 py-4 shadow-ambient-sm">
+				<div className="flex items-center gap-3 bg-surface-container-lowest border border-outline-variant rounded-2xl px-5 py-4">
 					<Icon name="lock" className="text-outline text-xl" />
 					<input
 						type={showPassword ? "text" : "password"}
@@ -82,6 +88,7 @@ export default function LoginPage() {
 						onChange={(e) => setPassword(e.target.value)}
 						className="flex-1 bg-transparent text-on-surface placeholder:text-outline font-medium outline-none"
 						autoComplete="current-password"
+            disabled={loading}
 					/>
 					<button
 						type="button"
@@ -109,7 +116,7 @@ export default function LoginPage() {
 				<button
 					type="submit"
 					disabled={loading}
-					className="btn w-full bg-on-surface text-surface border-0 rounded-2xl normal-case font-bold text-base py-4 h-auto mt-2 active:scale-[0.98] transition-transform disabled:opacity-60">
+					className="btn w-full primary-gradient text-white border-0 rounded-2xl normal-case font-bold text-base py-4 h-auto mt-2 active:scale-[0.98] transition-transform shadow-ambient-sm disabled:opacity-60">
 					{loading ? (
 						<span className="loading loading-spinner loading-sm" />
 					) : (

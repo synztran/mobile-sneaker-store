@@ -1,29 +1,9 @@
 "use client";
 
 import Icon from "@/components/ui/Icon";
+import { useCartStore, useCheckoutStore } from "@/store";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-const steps = [
-	{
-		href: "/checkout/shipping",
-		icon: "local_shipping",
-		label: "Thiết lập",
-		step: 1,
-	},
-	{
-		href: "/checkout/payment",
-		icon: "payments",
-		label: "Thanh toán",
-		step: 2,
-	},
-	{
-		href: "/checkout/review",
-		icon: "rate_review",
-		label: "Tổng kết",
-		step: 3,
-	},
-];
 
 export default function CheckoutLayout({
 	children,
@@ -31,8 +11,34 @@ export default function CheckoutLayout({
 	children: React.ReactNode;
 }) {
 	const pathname = usePathname();
+	const cartId = useCartStore((s) => s.cartId);
+	const orderId = useCheckoutStore((s) => s.orderId);
+
+	const steps = [
+		{
+			href: "/checkout/shipping",
+			icon: "local_shipping",
+			label: "Thiết lập",
+			step: 1,
+		},
+		{
+			href: cartId ? `/checkout/payment/${cartId}` : "/checkout/payment",
+			icon: "payments",
+			label: "Thanh toán",
+			step: 2,
+		},
+		{
+			href: orderId
+				? `/checkout/checking/${orderId}`
+				: "/checkout/checking",
+			icon: "rate_review",
+			label: "Tổng kết",
+			step: 3,
+		},
+	];
+
 	const currentStep = steps.findIndex((s) =>
-		pathname.includes(s.href.split("/").pop()!),
+		pathname.includes(s.href.split("/")[2]),
 	);
 
 	return (
@@ -62,7 +68,7 @@ export default function CheckoutLayout({
 							const idx = step - 1;
 							const isPast = idx < currentStep;
 							const isActive = idx === currentStep;
-							const canNavigate = isPast;
+							const canNavigate = isPast && currentStep !== 3;
 
 							return (
 								<li

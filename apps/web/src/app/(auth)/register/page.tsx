@@ -29,6 +29,10 @@ export default function RegisterPage() {
 			toast.error("Vui lòng điền đầy đủ thông tin");
 			return;
 		}
+		if (form.password.length < 8) {
+			toast.error("Mật khẩu phải có ít nhất 8 ký tự");
+			return;
+		}
 		if (form.password !== form.confirmPassword) {
 			toast.error("Mật khẩu không khớp");
 			return;
@@ -45,11 +49,27 @@ export default function RegisterPage() {
 		);
 		setLoading(false);
 		if (error) {
-			toast.error(error);
+			if (
+				error.toLowerCase().includes("sending confirmation email") ||
+				error.toLowerCase().includes("unexpected_failure")
+			) {
+				toast.error(
+					"Không thể gửi email xác nhận. Vui lòng thử lại sau.",
+				);
+			} else if (
+				error.toLowerCase().includes("already registered") ||
+				error.toLowerCase().includes("user already")
+			) {
+				toast.error("Email này đã được đăng ký. Vui lòng đăng nhập.");
+			} else {
+				toast.error(error);
+			}
 			return;
 		}
-		toast.success("Tài khoản đã được tạo! Kiểm tra email để xác nhận.");
-		router.push("/");
+		toast.success(
+			"Tài khoản đã được tạo! Vui lòng kiểm tra email để xác nhận.",
+		);
+		router.push("/login");
 	};
 
 	const handleGoogleSignUp = async () => {
@@ -64,7 +84,7 @@ export default function RegisterPage() {
 				Tạo tài khoản
 			</h2>
 			<p className="text-on-surface-variant text-sm mb-8">
-				Tham gia Sneaker Lab để có quyền truy cập độc quyền.
+				Tham gia Gariffe Lab để có quyền truy cập độc quyền.
 			</p>
 
 			{/* Form */}
@@ -105,6 +125,7 @@ export default function RegisterPage() {
 						name="password"
 						placeholder="Password"
 						value={form.password}
+						minLength={8}
 						onChange={handleChange}
 						className="flex-1 bg-transparent text-on-surface placeholder:text-outline font-medium outline-none"
 						autoComplete="new-password"
@@ -119,6 +140,7 @@ export default function RegisterPage() {
 						name="confirmPassword"
 						placeholder="Xác nhận mật khẩu"
 						value={form.confirmPassword}
+						minLength={8}
 						onChange={handleChange}
 						className="flex-1 bg-transparent text-on-surface placeholder:text-outline font-medium outline-none"
 						autoComplete="new-password"
@@ -159,7 +181,7 @@ export default function RegisterPage() {
 			</form>
 
 			{/* Divider */}
-			<div className="flex items-center gap-4 my-6">
+			{/* <div className="flex items-center gap-4 my-6">
 				<div className="flex-1 h-px bg-outline-variant" />
 				<span className="text-sm text-on-surface-variant font-medium">
 					Hoặc đăng ký với
@@ -167,7 +189,6 @@ export default function RegisterPage() {
 				<div className="flex-1 h-px bg-outline-variant" />
 			</div>
 
-			{/* Social buttons */}
 			<div className="flex gap-4 justify-center">
 				<button
 					type="button"
@@ -212,7 +233,7 @@ export default function RegisterPage() {
 						<path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
 					</svg>
 				</button>
-			</div>
+			</div> */}
 
 			{/* Log in link */}
 			<p className="text-center mt-8 text-on-surface text-sm">

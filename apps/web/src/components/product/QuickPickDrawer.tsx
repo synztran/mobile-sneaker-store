@@ -166,8 +166,8 @@ export function QuickPickDrawer({
 						{/* Color selector */}
 						{product.colors.length > 0 && (
 							<section>
-								<p className="text-[10px] font-black uppercase tracking-widest text-on-surface mb-3">
-									Color{" "}
+								<p className="text-xs font-black uppercase tracking-widest text-on-surface mb-3">
+									Màu/Phiên bản{" "}
 									<span className="normal-case font-medium text-on-surface-variant">
 										—{" "}
 										{product.colors[selectedColorIdx]?.name}
@@ -199,7 +199,7 @@ export function QuickPickDrawer({
 
 						{/* Size selector */}
 						<section>
-							<p className="text-[10px] font-black uppercase tracking-widest text-on-surface mb-3">
+							<p className="text-xs font-black uppercase tracking-widest text-on-surface mb-3">
 								Size (US)
 							</p>
 							<div className="grid grid-cols-4 gap-2">
@@ -232,14 +232,14 @@ export function QuickPickDrawer({
 							onClick={handleAdd}
 							disabled={selectedSize === null}
 							className={clsx(
-								"w-full py-4 rounded-2xl font-bold text-base uppercase tracking-widest transition-all active:scale-[0.98]",
+								"w-full py-4 rounded-2xl font-bold text-sm uppercase tracking-widest transition-all active:scale-[0.98]",
 								selectedSize !== null
 									? "primary-gradient text-white shadow-ambient-sm"
 									: "bg-surface-container text-on-surface-variant cursor-not-allowed",
 							)}>
 							{selectedSize === null
-								? "Select a Size"
-								: "Add to Bag"}
+								? "Chọn Size"
+								: "Thêm vào giỏ"}
 						</button>
 					</div>
 				)}

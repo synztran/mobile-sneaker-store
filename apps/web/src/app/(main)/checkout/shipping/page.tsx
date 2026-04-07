@@ -9,7 +9,13 @@ import { getPublicClient } from "@/lib/supabase/public";
 import { toast } from "@/lib/toast";
 import { useCartStore, useCheckoutStore } from "@/store";
 import clsx from "clsx";
-import { Motorbike } from "lucide-react";
+import {
+	Building2,
+	Mailbox,
+	MapPinHouse,
+	Motorbike,
+	Phone,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -36,7 +42,7 @@ const FIELDS = [
 		name: "apartment",
 		label: "Căn hộ / Tầng",
 		placeholder: "Tầng 4B",
-		icon: "apartment",
+		icon: <MapPinHouse size={20} />,
 		type: "text",
 		required: false,
 		colSpan: 2,
@@ -45,7 +51,7 @@ const FIELDS = [
 		name: "postalCode",
 		label: "Mã bưu điện",
 		placeholder: "70000",
-		icon: "markunread_mailbox",
+		icon: <Mailbox size={20} />,
 		type: "text",
 		required: false,
 		colSpan: 1,
@@ -54,7 +60,7 @@ const FIELDS = [
 		name: "phoneNumber",
 		label: "Số điện thoại",
 		placeholder: "0901 234 567",
-		icon: "phone",
+		icon: <Phone size={20} />,
 		type: "tel",
 		required: false,
 		colSpan: 1,
@@ -103,7 +109,7 @@ const DELIVERY_OPTIONS = [
 export default function ShippingPage() {
 	const router = useRouter();
 	const { setShipping } = useCheckoutStore();
-	const { total } = useCartStore();
+	const { total, cartId } = useCartStore();
 	const { shipping } = useCheckoutStore();
 	const { profile } = useAuth();
 	const [mounted, setMounted] = useState(false);
@@ -180,7 +186,9 @@ export default function ShippingPage() {
 			return;
 		}
 		setShipping({ ...form, deliverySpeed: delivery }, shippingCost);
-		router.push("/checkout/payment");
+		router.push(
+			cartId ? `/checkout/payment/${cartId}` : "/checkout/payment",
+		);
 	};
 
 	const immediateFee = mounted ? (fees?.delivery_immediate_price ?? 0) : 0;
@@ -267,15 +275,27 @@ export default function ShippingPage() {
 										? "border-error"
 										: "border-transparent focus-within:border-primary",
 								)}>
-								<Icon
-									name={String(field.icon)}
-									className={clsx(
-										"text-xl flex-shrink-0 transition-colors",
-										isInvalid(field)
-											? "text-error"
-											: "text-outline-variant",
-									)}
-								/>
+								{typeof field.icon === "string" ? (
+									<Icon
+										name={String(field.icon)}
+										className={clsx(
+											"text-xl flex-shrink-0 transition-colors",
+											isInvalid(field)
+												? "text-error"
+												: "text-outline-variant",
+										)}
+									/>
+								) : (
+									<div
+										className={clsx(
+											"text-xl flex-shrink-0 transition-colors",
+											isInvalid(field)
+												? "text-error"
+												: "text-outline-variant",
+										)}>
+										{field.icon}
+									</div>
+								)}
 								<input
 									name={field.name}
 									value={form[field.name]}
@@ -315,8 +335,7 @@ export default function ShippingPage() {
 								? "border-error"
 								: "border-transparent focus-within:border-primary",
 						)}>
-						<Icon
-							name="location_city"
+						<Building2
 							className={clsx(
 								"text-xl flex-shrink-0 transition-colors",
 								cityTouched && !form.city

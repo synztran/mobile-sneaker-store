@@ -18,7 +18,7 @@ interface TopNavProps {
 }
 
 export function TopNav({
-	title = "SNEAKER LAB",
+	title = "GIRAFFE LAB",
 	showBack = false,
 	backHref = "/",
 	showCart = true,

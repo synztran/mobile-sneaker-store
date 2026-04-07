@@ -1,4 +1,5 @@
 import { CartDrawer } from "@/components/cart/CartDrawer";
+import { BottomNav } from "@/components/layout/BottomNav";
 import { TopNav } from "@/components/layout/TopNav";
 
 export default function MainLayout({
@@ -12,7 +13,7 @@ export default function MainLayout({
 			<main className="main-top-offset main-bottom-offset min-h-screen">
 				{children}
 			</main>
-			{/* <BottomNav /> */}
+			<BottomNav />
 			<CartDrawer />
 		</>
 	);

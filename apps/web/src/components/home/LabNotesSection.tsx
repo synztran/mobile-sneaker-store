@@ -19,7 +19,7 @@ export function LabNotesSection() {
 	return (
 		<section className="px-6 mb-16">
 			<h3 className="text-3xl font-extrabold tracking-tighter uppercase mb-8">
-				Lab Notes
+				Giraffe Lab Chia sẻ
 			</h3>
 			<div className="space-y-8">
 				{ARTICLES.map((article) => (

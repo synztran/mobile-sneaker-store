@@ -22,8 +22,9 @@ function NewArrivalCard({ product }: { product: ShopProduct }) {
 					<div className="w-full h-full bg-surface-container" />
 				)}
 				<div className="absolute top-4 left-4 bg-primary text-on-primary text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest">
-					Just In
+					Mới
 				</div>
+				<div className="absolute inset-0 flex items-center justify-center pointer-events-none"></div>
 			</div>
 			<h4 className="font-bold text-base mb-1 line-clamp-1">
 				{product.model_name}
@@ -42,10 +43,10 @@ export async function NewArrivalsSection() {
 		<section className="py-16 overflow-hidden">
 			<div className="flex justify-between items-end px-6 mb-8">
 				<h3 className="text-3xl font-extrabold tracking-tighter uppercase">
-					New Arrivals
+					Hàng mới về
 				</h3>
 				<Link href="/shop" className="text-primary font-bold text-sm">
-					View All
+					Xem tất cả
 				</Link>
 			</div>
 			<div className="flex gap-6 overflow-x-auto px-6 hide-scrollbar">
